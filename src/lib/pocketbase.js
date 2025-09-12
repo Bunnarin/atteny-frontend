@@ -9,9 +9,3 @@ export const pbUser = writable(pb.authStore.model);
 pb.authStore.onChange(() => {
 	pbUser.set(pb.authStore.model);
 }, true);
-
-export async function logout() {
-	pb.authStore.clear();
-	await invalidateAll();
-	goto('/?message="logged out"');
-}
