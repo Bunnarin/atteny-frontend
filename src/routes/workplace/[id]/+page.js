@@ -2,6 +2,9 @@ import { workplaces } from '$lib/stores/workplace';
 import { pbUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
+export const prerender = false;
+export const ssr = false;
+
 export const load = async ({ params }) => {
     const workplacesData = get(workplaces);
     let workplace = null;
