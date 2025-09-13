@@ -7,10 +7,17 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@googleworkspace/drive-picker-element':
+        specifier: ^0.6.2
+        version: 0.6.2
+      '@sveltejs/adapter-static':
+        specifier: ^3.0.9
+        version: 3.0.9(@sveltejs/kit@2.5.10(@sveltejs/vite-plugin-svelte@3.1.0(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))
+      leaflet:
+        specifier: ^1.9.4
+        version: 1.9.4
     devDependencies:
-      '@sveltejs/adapter-auto':
-        specifier: ^3.0.0
-        version: 3.2.1(@sveltejs/kit@2.5.10(@sveltejs/vite-plugin-svelte@3.1.0(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))
       '@sveltejs/kit':
         specifier: ^2.0.0
         version: 2.5.10(@sveltejs/vite-plugin-svelte@3.1.0(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1))
@@ -42,8 +49,8 @@ importers:
         specifier: ^2.35.1
         version: 2.39.0(eslint@8.57.0)(svelte@4.2.17)
       pocketbase:
-        specifier: ^0.21.2
-        version: 0.21.2
+        specifier: github:bunnarin/pb-js-sdk
+        version: https://codeload.github.com/bunnarin/pb-js-sdk/tar.gz/e87bedd8cc6032ea6a48ffac642b38baa771b020
       prettier:
         specifier: ^3.1.1
         version: 3.2.5
@@ -228,6 +235,9 @@ packages:
     resolution: {integrity: sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
+  '@googleworkspace/drive-picker-element@0.6.2':
+    resolution: {integrity: sha512-/F1knobjzu0jB/Kc307YoGnC65wKpPpIDcVZYGukzz5QtIO2M5lLH6+FXZdqsuOTk64iWTR7a1s7LIh1xlGQGg==}
+
   '@humanwhocodes/config-array@0.11.14':
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
     engines: {node: '>=10.10.0'}
@@ -352,8 +362,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@sveltejs/adapter-auto@3.2.1':
-    resolution: {integrity: sha512-/3xx8ZFCD5UBc/7AbyXkFF3HNCzWAp2xncH8HA4doGjoGQEN7PmwiRx4Y9nOzi4mqDqYYUic0gaIAE2khWWU4Q==}
+  '@sveltejs/adapter-static@3.0.9':
+    resolution: {integrity: sha512-aytHXcMi7lb9ljsWUzXYQ0p5X1z9oWud2olu/EpmH7aCu4m84h7QLvb5Wp+CFirKcwoNnYvYWhyP/L8Vh1ztdw==}
     peerDependencies:
       '@sveltejs/kit': ^2.0.0
 
@@ -834,6 +844,9 @@ packages:
   known-css-properties@0.31.0:
     resolution: {integrity: sha512-sBPIUGTNF0czz0mwGGUoKKJC8Q7On1GPbCSFPfyEsfHb2DyBG0Y4QtV+EVWpINSaiGKZblDNuF5AezxSgOhesQ==}
 
+  leaflet@1.9.4:
+    resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
+
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
@@ -959,8 +972,9 @@ packages:
     resolution: {integrity: sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==}
     engines: {node: '>=12'}
 
-  pocketbase@0.21.2:
-    resolution: {integrity: sha512-XZdgU9dEv3TPjexDRHy5feYrZrJhWqxTki8ClFGpsnC51G3Qkwoa/U7CVG72jYcLDP3p0HiEhRUUevnlryWkHA==}
+  pocketbase@https://codeload.github.com/bunnarin/pb-js-sdk/tar.gz/e87bedd8cc6032ea6a48ffac642b38baa771b020:
+    resolution: {tarball: https://codeload.github.com/bunnarin/pb-js-sdk/tar.gz/e87bedd8cc6032ea6a48ffac642b38baa771b020}
+    version: 0.26.2
 
   postcss-load-config@3.1.4:
     resolution: {integrity: sha512-6DiM4E7v4coTE4uzA8U//WhtPwyhiim3eyjEMFCnUpzbrkK9wJHgKDT2mR+HbtSrd/NubVaYTOpSpjUl8NQeRg==}
@@ -1361,6 +1375,8 @@ snapshots:
 
   '@eslint/js@8.57.0': {}
 
+  '@googleworkspace/drive-picker-element@0.6.2': {}
+
   '@humanwhocodes/config-array@0.11.14':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
@@ -1452,10 +1468,9 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.17.2':
     optional: true
 
-  '@sveltejs/adapter-auto@3.2.1(@sveltejs/kit@2.5.10(@sveltejs/vite-plugin-svelte@3.1.0(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))':
+  '@sveltejs/adapter-static@3.0.9(@sveltejs/kit@2.5.10(@sveltejs/vite-plugin-svelte@3.1.0(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))':
     dependencies:
       '@sveltejs/kit': 2.5.10(@sveltejs/vite-plugin-svelte@3.1.0(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1))
-      import-meta-resolve: 4.1.0
 
   '@sveltejs/kit@2.5.10(@sveltejs/vite-plugin-svelte@3.1.0(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1)))(svelte@4.2.17)(vite@5.2.11(@types/node@24.3.1))':
     dependencies:
@@ -2011,6 +2026,8 @@ snapshots:
 
   known-css-properties@0.31.0: {}
 
+  leaflet@1.9.4: {}
+
   levn@0.4.1:
     dependencies:
       prelude-ls: 1.2.1
@@ -2114,7 +2131,7 @@ snapshots:
 
   picomatch@4.0.2: {}
 
-  pocketbase@0.21.2: {}
+  pocketbase@https://codeload.github.com/bunnarin/pb-js-sdk/tar.gz/e87bedd8cc6032ea6a48ffac642b38baa771b020: {}
 
   postcss-load-config@3.1.4(postcss@8.4.38):
     dependencies:

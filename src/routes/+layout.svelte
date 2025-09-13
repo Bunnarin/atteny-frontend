@@ -9,17 +9,26 @@
 	async function logout() {
 		pb.authStore.clear();
 		await invalidateAll();
-		goto('/?message="logged out"');
+		goto('/');
 	}
 
 	async function login() {
-		const authMethods = await pb.collection('users').listAuthMethods();
-		const [provider] = authMethods.oauth2.providers;
-		await pb.collection('users').authWithOAuth2({
-			provider: provider.name,
-			redirectURL: window.location.href,
-			codeVerifier: provider.codeVerifier
+		const {record, meta} = await pb.collection('users').authWithOAuth2({
+			provider: 'google',
+			scopes: [
+				"https://www.googleapis.com/auth/userinfo.profile",
+				"https://www.googleapis.com/auth/userinfo.email",
+				"https://www.googleapis.com/auth/drive.file",
+			],
+			params: {
+				prompt: "consent",
+				access_type: "offline",
+			}
 		});
+		if (!record.google_refresh_token)
+			await pb.collection('users').update(record.id, {
+				google_refresh_token: meta?.refresh_token,
+			});
 	}
 </script>
 
