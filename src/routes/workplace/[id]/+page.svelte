@@ -141,7 +141,6 @@
     }
 
     async function upsert() {
-        console.log(workplaces);
         // to ensure that a file is selected
         if (!selectedFile) 
             alert('Please select a spreadsheet file before submitting.');

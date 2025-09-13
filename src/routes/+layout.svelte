@@ -23,7 +23,10 @@
 			params: {
 				prompt: "consent",
 				access_type: "offline",
-			}
+			},
+			urlCallback: (url) => {
+                window.location.href = url;
+            }
 		});
 		if (!record.google_refresh_token)
 			await pb.collection('users').update(record.id, {
