@@ -2,7 +2,8 @@ import { pb } from '$lib/pocketbase';
 
 export async function load() {
 	try {
-		await pb.collection('users').authRefresh();
+		if (pb.authStore.isValid) 
+			await pb.collection('users').authRefresh();
 	} catch (error) {
 		pb.authStore.clear();
 	}

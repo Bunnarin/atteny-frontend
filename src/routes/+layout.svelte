@@ -5,6 +5,13 @@
 	import { goto } from '$app/navigation';
 	import { pb, pbUser } from '$lib/pocketbase';
 	import { invalidateAll } from '$app/navigation';
+    import { onMount } from 'svelte';
+
+	onMount(() => {
+		window.addEventListener('message', (event) => {
+			console.table(event);
+		}, false);
+	});
 	
 	async function logout() {
 		pb.authStore.clear();
@@ -27,7 +34,7 @@
 		});
 		if (!record.google_refresh_token)
 			await pb.collection('users').update(record.id, {
-				google_refresh_token: meta?.refresh_token,
+				google_refresh_token: meta?.refreshToken,
 			});
 	}
 </script>
