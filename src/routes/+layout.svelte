@@ -36,6 +36,7 @@
 			await pb.collection('users').update(record.id, {
 				google_refresh_token: meta?.refreshToken,
 			});
+		window.location.reload();
 	}
 </script>
 

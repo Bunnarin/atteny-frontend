@@ -4,7 +4,7 @@
     import { goto } from '$app/navigation';
     import { pb, pbUser } from '$lib/pocketbase';
     import { get } from 'svelte/store';
-    import { workplaces } from '$lib/stores/workplace';
+    import { workplaceStore } from '$lib/stores/workplace';
     export let data;
         
     // Initialize workplace_fixture with data or defaults

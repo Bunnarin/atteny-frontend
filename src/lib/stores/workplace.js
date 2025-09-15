@@ -24,4 +24,4 @@ function createWorkplaceStore() {
     };
 }
 
-export const workplaces = createWorkplaceStore();
+export const workplaceStore = createWorkplaceStore();

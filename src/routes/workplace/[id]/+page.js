@@ -1,4 +1,4 @@
-import { workplaces } from '$lib/stores/workplace';
+import { workplaceStore } from '$lib/stores/workplace';
 import { pbUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
@@ -6,10 +6,10 @@ export const prerender = false;
 export const ssr = false;
 
 export const load = async ({ params }) => {
-    const workplacesData = get(workplaces);
+    const workplaces = get(workplaceStore);
     let workplace = null;
     if (params.id != "new") {
-        [workplace] = workplacesData.filter(w => w.id == params.id);
+        [workplace] = workplaces.filter(w => w.id == params.id);
     }
     return {
         workplace,
