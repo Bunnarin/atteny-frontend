@@ -1,6 +1,5 @@
 <script>
     import { onMount } from "svelte";
-    import tooltip from "@/actions/tooltip";
     import L from "leaflet";
     import "leaflet/dist/leaflet.css";
 
@@ -62,8 +61,6 @@
             draggable: true,
             autoPan: true,
         }).addTo(map);
-
-        marker.bindTooltip("drag or right click anywhere on the map to move");
 
         marker.on("moveend", (e) => {
             if (e.sourceTarget?._latlng) {
@@ -180,7 +177,6 @@
                     <button
                         type="button"
                         class="dropdown-item"
-                        use:tooltip={"Select address coordinates"}
                         on:click={() => select(result.lat, result.lon)}
                     >
                         {result.name}
@@ -191,3 +187,43 @@
     </div>
     <div bind:this={mapEl} class="map-box"></div>
 </div>
+
+<style lang="scss">
+    .map-wrapper {
+        position: relative;
+        display: block;
+        height: 100%;
+        width: 100%;
+    }
+    .map-box {
+        z-index: 1;
+        height: 100%;
+        width: 100%;
+    }
+    .map-search {
+        position: absolute;
+        z-index: 2;
+        top: 10px;
+        width: 70%;
+        max-width: 400px;
+        margin-left: 15%;
+        height: auto;
+        input {
+            opacity: 0.7;
+            background: var(--baseColor);
+            border: 0;
+            box-shadow: 0 0 3px 0 var(--shadowColor);
+            transition: opacity var(--baseAnimationSpeed);
+        }
+        .dropdown {
+            max-height: 150px;
+            border: 0;
+            box-shadow: 0 0 3px 0 var(--shadowColor);
+        }
+        &:focus-within {
+            input {
+                opacity: 1;
+            }
+        }
+    }
+</style>
