@@ -4,6 +4,7 @@
     import { page } from '$app/stores';
     import { writable, get } from 'svelte/store';
     import { pb, pbUser } from '$lib/pocketbase';
+    import { requestStore } from '$lib/stores/request.js';
 
     // Store for clock-in statuses
     const clockInStatuses = writable({});
@@ -255,11 +256,11 @@
         {#if modalError}
             <div class="error">{modalError}</div>
         {/if}
-        <h3>Request Leave</h3> 
+        <div class="form-question">
             Date: <input type="date" bind:value={date} required min={new Date().toISOString().split('T')[0]} />
             <br>
             Reason: <input bind:value={reason} required maxlength="255"/>
-            <br>
+        </div>
         <button class="btn-primary" on:click={() => {
             pb.collection('request').create({
                 workplace: modalWorkplaceId,
@@ -267,7 +268,7 @@
                 date,
                 reason,
             })
-            .then(() => modalWorkplaceId = '')
+            .then(() => {modalWorkplaceId = ''; requestStore.refresh();})
             .catch(error => modalError = error);
         }}>Submit</button>
         <button class="btn-secondary" on:click={() => modalWorkplaceId = ''}>Cancel</button>

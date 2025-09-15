@@ -1,3 +1,5 @@
+@import 'tailwindcss';
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -465,7 +467,7 @@ html {
   margin-bottom: 8px;
 }
 
-.question-input {
+input {
   width: 100%;
   padding: 12px 16px;
   border: none;
@@ -477,12 +479,12 @@ html {
   transition: border-bottom-color 0.2s ease;
 }
 
-.question-input:focus {
+.input:focus {
   border-bottom-color: #673ab7;
   border-bottom-width: 2px;
 }
 
-.question-input::placeholder {
+.input::placeholder {
   color: #9aa0a6;
 }
 

@@ -14,9 +14,6 @@ function createRequestStore() {
         return requests;
     }
 
-    // Initial load
-    refresh();
-
     return {
         subscribe,
         refresh,

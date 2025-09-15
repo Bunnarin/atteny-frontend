@@ -14,9 +14,6 @@ function createWorkplaceStore() {
         return workplaces;
     }
 
-    // Initial load
-    refresh();
-
     return {
         subscribe,
         refresh,

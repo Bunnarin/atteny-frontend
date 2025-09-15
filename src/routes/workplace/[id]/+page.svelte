@@ -181,8 +181,7 @@
 {/if}
 
 <div class="form-question">
-    <label class="question-title" for="name">Workplace Name:</label>
-    <input class="question-input" id="name" name="name" maxlength="255" required bind:value={workplace_fixture.name}/>
+    Workplace Name: <input id="name" name="name" maxlength="255" required bind:value={workplace_fixture.name}/>
 </div>
 
 <div class="form-question">
@@ -206,9 +205,8 @@
 {/if}
 
 <div class="form-question">
-    <label class="question-title" for="email">Remaining: {emails.length} of {data.free_spots}</label>
+    Remaining: {emails.length} of {data.free_spots}
     <input
-        class="question-input"
         id="email"
         type="email"
         bind:value={currentEmail}
@@ -234,8 +232,7 @@
 </div>
 
 <div class="form-question">
-    <label class="question-title" for="proximity">Proximity (m):</label>
-    <input class="question-input" id="proximity" name="proximity" type="number" min="10" max="10000" required bind:value={workplace_fixture.proximity}/>
+    Proximity (m): <input id="proximity" name="proximity" type="number" min="10" max="10000" required bind:value={workplace_fixture.proximity}/>
 </div>
 
 <div class="form-section">
