@@ -274,3 +274,80 @@
     </div>
 </div>
 {/if}
+
+{#if !$pbUser}
+    <!-- Hero Section - Catchy headline and call to action -->
+    <section class="py-20 md:py-32 text-center">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800 mb-4 leading-tight">
+                Track Employee Attendance, The Easy Way.
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                A simple, intuitive, and completely free attendance solution for small businesses.
+            </p>
+        </div>
+    </section>
+
+    <!-- Features Section - Highlight key benefits -->
+    <section class="py-16 md:py-24 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
+                Features Built for Simplicity
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">One-Click Clock-In</h3>
+                    <p class="text-gray-600">
+                        Employees can clock in and out with a single tap, no app download required.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Instant Data Sync</h3>
+                    <p class="text-gray-600">
+                        Attendance data is instantly synced to your Google Sheets, giving you real-time access.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                    <div class="w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.047m0 0a12.042 12.042 0 00-2.887 6.945c.188 1.944.978 3.864 2.307 5.594l.872.871a1.002 1.002 0 001.414 0l.871-.871a12.042 12.042 0 002.307-5.594c.007-.03.013-.06.02-.09m0 0a12.042 12.042 0 00-2.887-6.945z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Zero-Cost Solution</h3>
+                    <p class="text-gray-600">
+                        Leveraging free platforms, we provide a powerful tool without the heavy subscription fees.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="py-20 md:py-24 text-center bg-red-600 text-white">
+        <div class="container mx-auto px-4 max-w-3xl">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4">Ready to simplify your workflow?</h2>
+            <p class="text-lg md:text-xl opacity-90 mb-8">
+                Join the many small businesses saving time and money with a better way to track attendance.
+            </p>
+            <button id="final-cta-btn" class="bg-white text-indigo-600 px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-gray-100 transition-colors">
+                Get Started Now
+            </button>
+        </div>
+    </section>
+{/if}
+

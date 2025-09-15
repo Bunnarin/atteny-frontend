@@ -5,7 +5,6 @@
 	import { goto } from '$app/navigation';
 	import { pb, pbUser } from '$lib/pocketbase';
 	import { invalidateAll } from '$app/navigation';
-    import { onMount } from 'svelte';
 	
 	async function logout() {
 		pb.authStore.clear();
@@ -38,7 +37,7 @@
 	<a href="/"><img class="logo" src="/favicon.png" alt="Logo"/></a>
 	{#if $pbUser}
 		<div class="user">
-			<button class="btn-primary" on:click={() => goto('/payway')}>Buy</button>
+			<button class="btn-primary" on:click={() => goto('/buy')}>Buy</button>
 			<button class="btn-secondary" on:click={logout}>Logout</button>
 		</div>
 	{:else}
