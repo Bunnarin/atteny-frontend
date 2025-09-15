@@ -6,12 +6,6 @@
 	import { pb, pbUser } from '$lib/pocketbase';
 	import { invalidateAll } from '$app/navigation';
     import { onMount } from 'svelte';
-
-	onMount(() => {
-		window.addEventListener('message', (event) => {
-			console.table(event);
-		}, false);
-	});
 	
 	async function logout() {
 		pb.authStore.clear();
@@ -48,7 +42,7 @@
 			<button class="btn-secondary" on:click={logout}>Logout</button>
 		</div>
 	{:else}
-	<button class="btn-primary" on:click={login}>Login</button>
+		<button class="btn-primary" on:click={login}>Login</button>
 	{/if}
 </div>
 <slot />

@@ -1,9 +1,3 @@
-{#if $pbUser}
-<div class="form-actions">
-    <button class="btn-primary" on:click={() => goto('/workplace/new')}>Add Workplace</button>
-</div>
-{/if}
-
 <script>
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
@@ -19,13 +13,13 @@
     let locationError = '';
     let successMessage = '';
     let selectedWorkplaceId = '';
+    let modalWorkplaceId = '';
     let clockingIn = false;
 
-    let showLeaveModal = false;
-    let date = '';
+    // for the modal
+    let date = new Date().toISOString().split('T')[0];
     let reason = '';
-    let formError = '';
-    let formSuccess = '';
+    let modalError;
 
     // Add error message state
     $: errorMessage = $page.url.searchParams.get('message');
@@ -201,6 +195,12 @@
     </div>
 {/if}
 
+{#if $pbUser}
+<div class="form-actions">
+    <button class="btn-primary" on:click={() => goto('/workplace/new')}>Add Workplace</button>
+</div>
+{/if}
+
 {#if data.workplaces_as_employer.length}
 <h1 class="form-title">Workplaces (as employer)</h1>
 {#each data.workplaces_as_employer as workplace}
@@ -242,35 +242,35 @@
                     Clock In
                 {/if}
             </button>
-            <button class="btn-primary" on:click={() => {showLeaveModal = true; selectedWorkplaceId = workplace.id;}}>Request Leave</button>
+            <button class="btn-primary" on:click={() => modalWorkplaceId = workplace.id}>Request Leave</button>
         </div>
     {/each}
 {/if}
 
-{#if showLeaveModal}
+{#if modalWorkplaceId}
 <div class="modal-overlay">
     <div class="modal-content">
-        <h3>Request Leave</h3>
-        
-        {#if formError}
-            <div class="error-message">{formError}</div>
+        {#if modalError}
+            <div class="error">{modalError}</div>
         {/if}
-        
-        {#if formSuccess}
-            <div class="success-message">{formSuccess}</div>
-        {/if}
-
-        <form action="?/request_leave" method="POST">
-            <input type="hidden" name="workplace_id" value={selectedWorkplaceId} />
-            <div class="form-question">
-                Date: <input type="date" id="date" name="date" bind:value={date} required min={new Date().toISOString().split('T')[0]} />
-            </div>
-            <div class="form-question">
-                Reason: <input type="text" id="reason" name="reason" bind:value={reason} required maxlength="255"/>
-            </div>
-            <button type="submit">Submit Request</button>
-            <button type="button" on:click={() => showLeaveModal = false}>Cancel</button>
-        </form>
+        <h3>Request Leave</h3> 
+        <div class="form-question">
+            Date: <input type="date" bind:value={date} required min={new Date().toISOString().split('T')[0]} />
+        </div>
+        <div class="form-question">
+            Reason: <input bind:value={reason} required maxlength="255"/>
+        </div>
+        <button on:click={() => {
+            pb.collection('request').create({
+                workplace: modalWorkplaceId,
+                createdBy: get(pbUser)?.id,
+                date,
+                reason,
+            })
+            .then(() => modalWorkplaceId = '')
+            .catch(error => modalError = error);
+        }}>Submit Request</button>
+        <button type="button" on:click={() => modalWorkplaceId = ''}>Cancel</button>
     </div>
 </div>
 {/if}
