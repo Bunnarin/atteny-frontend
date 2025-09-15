@@ -38,7 +38,7 @@
 	<a href="/"><img class="logo" src="/favicon.png" alt="Logo"/></a>
 	{#if $pbUser}
 		<div class="user">
-			<button class="btn-primary" on:click={() => goto('/buy')}>Buy</button>
+			<!-- <button class="btn-primary" on:click={() => goto('/buy')}>Buy</button> -->
 			<button class="btn-secondary" on:click={logout}>Logout</button>
 		</div>
 	{:else}
