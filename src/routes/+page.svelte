@@ -336,18 +336,5 @@
             </div>
         </div>
     </section>
-
-    <!-- Call to Action Section -->
-    <section class="py-20 md:py-24 text-center bg-red-600 text-white">
-        <div class="container mx-auto px-4 max-w-3xl">
-            <h2 class="text-3xl md:text-5xl font-bold mb-4">Ready to simplify your workflow?</h2>
-            <p class="text-lg md:text-xl opacity-90 mb-8">
-                Join the many small businesses saving time and money with a better way to track attendance.
-            </p>
-            <button id="final-cta-btn" class="bg-white text-red-600 px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-gray-100 transition-colors">
-                Get Started Now
-            </button>
-        </div>
-    </section>
 {/if}
 
