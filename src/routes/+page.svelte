@@ -210,7 +210,9 @@
         <button class="btn-primary" on:click={() => copy_link(workplace)}>
             {selectedWorkplaceId === workplace.id ? 'Copied!' : 'Invite Link'}
         </button>
-        <button class="btn-primary" on:click={() => goto(`/request/${workplace.id}`)}>pending requests</button>
+        <button class="btn-primary" on:click={() => goto(`/request/${workplace.id}`)} disabled={!data.requests.filter(r => r.workplace === workplace.id).length}>
+            pending requests
+        </button>
     </div>
 {/each}
 {/if}
@@ -254,13 +256,11 @@
             <div class="error">{modalError}</div>
         {/if}
         <h3>Request Leave</h3> 
-        <div class="form-question">
             Date: <input type="date" bind:value={date} required min={new Date().toISOString().split('T')[0]} />
-        </div>
-        <div class="form-question">
+            <br>
             Reason: <input bind:value={reason} required maxlength="255"/>
-        </div>
-        <button on:click={() => {
+            <br>
+        <button class="btn-primary" on:click={() => {
             pb.collection('request').create({
                 workplace: modalWorkplaceId,
                 createdBy: get(pbUser)?.id,
@@ -269,8 +269,8 @@
             })
             .then(() => modalWorkplaceId = '')
             .catch(error => modalError = error);
-        }}>Submit Request</button>
-        <button type="button" on:click={() => modalWorkplaceId = ''}>Cancel</button>
+        }}>Submit</button>
+        <button class="btn-secondary" on:click={() => modalWorkplaceId = ''}>Cancel</button>
     </div>
 </div>
 {/if}

@@ -168,6 +168,8 @@
             await pb.collection('workplace').update(data.workplace.id, workplace_fixture);
         else
             await pb.collection('workplace').create(workplace_fixture);
+        // refresh the workplace store
+        workplaceStore.refresh();
         goto('/');
     }
 </script>
@@ -233,7 +235,7 @@
 
 <div class="form-question">
     <label class="question-title" for="proximity">Proximity (m):</label>
-    <input class="question-input" id="proximity" name="proximity" type="number" min="10" max="1000" required bind:value={workplace_fixture.proximity}/>
+    <input class="question-input" id="proximity" name="proximity" type="number" min="10" max="10000" required bind:value={workplace_fixture.proximity}/>
 </div>
 
 <div class="form-section">
