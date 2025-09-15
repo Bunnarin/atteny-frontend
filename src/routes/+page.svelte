@@ -344,7 +344,7 @@
             <p class="text-lg md:text-xl opacity-90 mb-8">
                 Join the many small businesses saving time and money with a better way to track attendance.
             </p>
-            <button id="final-cta-btn" class="bg-white text-indigo-600 px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-gray-100 transition-colors">
+            <button id="final-cta-btn" class="bg-white text-red-600 px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-gray-100 transition-colors">
                 Get Started Now
             </button>
         </div>
