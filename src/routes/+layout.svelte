@@ -36,7 +36,7 @@
 </script>
 
 <div class="header">
-	<a href="/"><img class="logo" src="/favicon.png" alt="Logo"/></a>
+	<img type="button" class="logo" src="/favicon.png" alt="Logo" on:click={() => goto('/')} />
 	{#if $pbUser}
 		<div class="user">
 			<button class="btn-primary" on:click={() => goto('/buy')}>Buy</button>

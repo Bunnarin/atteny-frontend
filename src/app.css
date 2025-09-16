@@ -221,7 +221,7 @@ html {
 .compact-time-input {
     width: 100%;
     min-width: 80px;
-    max-width: 120px;
+    max-width: 150px;
     margin-right: 8px;
     flex-shrink: 1;
     box-sizing: border-box;
