@@ -4,6 +4,7 @@ import { pb } from "$lib/pocketbase";
 function createRequestStore() {
     const { subscribe, set } = writable([]);
     let initialized = false;
+    let initPromise = null;
     
     async function refresh() {
         const requests = await pb.collection('request').getFullList({
@@ -14,10 +15,22 @@ function createRequestStore() {
         return requests;
     }
 
+    // Initialize on first access
+    function ensureInitialized() {
+        if (!initPromise) {
+            initPromise = refresh();
+        }
+        return initPromise;
+    }
+
+    // Start initialization
+    ensureInitialized();
+
     return {
         subscribe,
         refresh,
-        initialized: () => initialized
+        initialized: () => initialized,
+        ensureInitialized
     };
 }
 

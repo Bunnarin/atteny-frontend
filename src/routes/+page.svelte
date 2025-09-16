@@ -21,6 +21,7 @@
     let date = new Date().toISOString().split('T')[0];
     let reason = '';
     let modalError;
+    let submitting = false;
 
     // Add error message state
     $: errorMessage = $page.url.searchParams.get('message');
@@ -171,8 +172,7 @@
                 }
             },
             (error) => {
-                console.error('Geolocation error:', error);
-                locationError = error.message;
+                alert("Unable to get your location. Make sure that your browser and our site has loication permission");
             }
         );
     }
@@ -258,19 +258,25 @@
         {/if}
         <div class="form-question">
             Date: <input type="date" bind:value={date} required min={new Date().toISOString().split('T')[0]} />
-            <br>
+            <br><br>
             Reason: <input bind:value={reason} required maxlength="255"/>
         </div>
-        <button class="btn-primary" on:click={() => {
+        <button class="btn-primary" disabled={submitting} on:click={() => {
+            modalError = '';
+            submitting = true;
             pb.collection('request').create({
                 workplace: modalWorkplaceId,
                 createdBy: get(pbUser)?.id,
                 date,
                 reason,
             })
-            .then(() => {modalWorkplaceId = ''; requestStore.refresh();})
-            .catch(error => modalError = error);
-        }}>Submit</button>
+            .then(() => {modalWorkplaceId = ''; requestStore.refresh(); reason=""; date="";})
+            .catch(() => modalError = "you have already requested leave for this date.")
+            .then(() => submitting = false);
+        }}>
+            {#if submitting}Submitting...{:else}Submit{/if}
+        </button>
+        <!-- make it says submitting when clicked -->
         <button class="btn-secondary" on:click={() => modalWorkplaceId = ''}>Cancel</button>
     </div>
 </div>

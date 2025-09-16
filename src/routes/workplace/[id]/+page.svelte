@@ -1,12 +1,17 @@
 <script>
     import {PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_GOOGLE_PROJECT_NUMBER} from '$env/static/public';
     import { goto } from '$app/navigation';
-    import { pb, pbUser } from '$lib/pocketbase';
+    import { pb, pbUser, login } from '$lib/pocketbase';
     import { get } from 'svelte/store';
     import { workplaceStore } from '$lib/stores/workplace';
     import Map from '$lib/components/map.svelte';  
+    import { onMount } from 'svelte';
 
     export let data;
+
+    // if the current user doesnt have refresh_token, prompt them for it.
+    if (!get(pbUser)?.google_refresh_token) 
+		login(true);
         
     // Initialize workplace_fixture with data or defaults
     const workplace_fixture = {
@@ -23,6 +28,7 @@
     let selectedFile = data.workplace?.file_id;
     let showPicker = false;
 
+    onMount(async () => await import('@googleworkspace/drive-picker-element'));
 
     function addEmail(event) {
         if (event.key !== 'Enter' || emails.length >= data.free_spots)
@@ -30,10 +36,9 @@
         event.preventDefault();
         if (emails.includes(currentEmail.trim()) || !currentEmail.includes('@'))
             return;
-        if (currentEmail.trim()) {
+        if (currentEmail.trim()) 
             emails = [...emails, currentEmail.trim()];
-            currentEmail = '';
-        }
+        currentEmail = '';
     }
 
     async function delete_workplace() {
@@ -98,9 +103,7 @@
     login-hint="{get(pbUser).email}"
     on:picker:picked={(e) => [ selectedFile ] = e.detail.docs}
     >
-    <drive-picker-docs-view owned-by-me="true"
-        mime-types="application/vnd.google-apps.spreadsheet">
-    </drive-picker-docs-view>
+    <drive-picker-docs-view owned-by-me="true" mime-types="application/vnd.google-apps.spreadsheet"></drive-picker-docs-view>
 </drive-picker>
 {/if}
 
@@ -121,10 +124,7 @@
 </div>
 
 <div class="form-question">
-    Location:
-    <div style="height: 300px; margin: 1rem 0; border-radius: 4px; overflow: hidden;">
-        <Map bind:point={workplace_fixture.location} height={300} />
-    </div>
+    Location: <Map bind:point={workplace_fixture.location} height={300} />
 </div>
 
 <div class="form-question">
@@ -135,12 +135,11 @@
     <h2>Clock-in Time Rules</h2>
     <p>Define time windows when employees can clock in. Leave empty for 24/7 access.</p>
     {#each workplace_fixture.rules as rule, index}
-        <div>
-            <input type="time" bind:value={rule.s} class="compact-time-input"/>
-            to  
-            <input type="time" bind:value={rule.e} class="compact-time-input"/>
-            <button class="btn-primary" type="button" on:click={() => workplace_fixture.rules = workplace_fixture.rules.filter((_, i) => i !== index) }>x</button>
-        </div>
+        <input type="time" bind:value={rule.s} class="compact-time-input"/>
+        to  
+        <input type="time" bind:value={rule.e} class="compact-time-input"/>
+        <button class="btn-primary" type="button" on:click={() => workplace_fixture.rules = workplace_fixture.rules.filter((_, i) => i !== index) }>x</button>
+        <br>
     {/each}
     <button class="btn-secondary" type="button" on:click={() => workplace_fixture.rules = [...workplace_fixture.rules, {s: '01:00', e: '23:59'}]}>Add Time Window</button>
 </div>

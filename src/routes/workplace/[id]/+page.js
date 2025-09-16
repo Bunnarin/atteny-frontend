@@ -6,6 +6,7 @@ export const prerender = false;
 export const ssr = false;
 
 export const load = async ({ params }) => {
+    // calling the api all the time if I call refresh
     const workplaces = get(workplaceStore);
     let workplace = null;
     if (params.id != "new") 

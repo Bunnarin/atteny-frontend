@@ -9,12 +9,20 @@ export async function load() {
         workplaces_as_employee: [],
         requests: []
     };
-    const workplaces = await workplaceStore.refresh();
+
+    // Wait for both stores to initialize
+    await Promise.all([
+        workplaceStore.ensureInitialized(),
+        requestStore.ensureInitialized()
+    ]);
     
+    const workplaces = get(workplaceStore);
+    const requests = get(requestStore);
     const user = get(pbUser);
+    
     return {
         workplaces_as_employer: workplaces.filter(w => w.employer === user.id),
         workplaces_as_employee: workplaces.filter(w => w.employees?.includes(user.id)),
-        requests: await requestStore.refresh()
+        requests
     };
 }

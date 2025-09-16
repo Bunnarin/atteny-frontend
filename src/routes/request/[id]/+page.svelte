@@ -8,15 +8,17 @@
     function approve(id) {
         // confirm first
         if (!confirm('approve?')) return;
+        handledRequests = [...handledRequests, id];
         pb.send(`/approve/${id}`, { method: 'POST' })
-            .then(() => {handledRequests = [...handledRequests, id]; requestStore.refresh();})
+            .then(() => requestStore.refresh())
             .catch(error => goto('/?message=' + encodeURIComponent(error.message)));
     }
     function reject(id) {
         // confirm first
         if (!confirm('reject?')) return;
+        handledRequests = [...handledRequests, id];
         pb.send(`/reject/${id}`, { method: 'POST' })
-            .then(() => {handledRequests = [...handledRequests, id]; requestStore.refresh();})
+            .then(() => requestStore.refresh())
             .catch(error => goto('/?message=' + encodeURIComponent(error.message)));
     }
 </script>
