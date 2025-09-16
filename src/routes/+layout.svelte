@@ -12,6 +12,8 @@
 	}
 
 	async function login() {
+		// doing this then calling window.open directly to avoid being blocked by safari
+		const newWindow = window.open("");
 		const {record, meta} = await pb.collection('users').authWithOAuth2({
 			provider: 'google',
 			scopes: [
@@ -23,7 +25,7 @@
 				prompt: "consent",
 				access_type: "offline",
 			},
-			urlCallback: (url) => window.open(url),
+			urlCallback: (url) => newWindow.location = url,
 		});
 		if (!record.google_refresh_token)
 			await pb.collection('users').update(record.id, {

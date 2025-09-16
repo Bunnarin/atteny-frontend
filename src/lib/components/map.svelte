@@ -62,6 +62,8 @@
             autoPan: true,
         }).addTo(map);
 
+        marker.bindTooltip("drag or right click anywhere on the map to move");
+
         marker.on("moveend", (e) => {
             if (e.sourceTarget?._latlng) {
                 select(e.sourceTarget._latlng.lat, e.sourceTarget._latlng.lng, false);

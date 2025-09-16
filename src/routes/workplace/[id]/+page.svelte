@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import {PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_GOOGLE_PROJECT_NUMBER} from '$env/static/public';
     import { goto } from '$app/navigation';
     import { pb, pbUser } from '$lib/pocketbase';
@@ -23,21 +23,6 @@
     let selectedFile = data.workplace?.file_id;
     let showPicker = false;
 
-    let point = { 
-        lat: workplace_fixture.location.lat || 0, 
-        lon: workplace_fixture.location.lon || 0 
-    };
-
-    $: if (data.workplace) {
-        point = { 
-            lat: data.workplace.location?.lat || 0, 
-            lon: data.workplace.location?.lon || 0 
-        };
-    }
-
-    $: if (point) {
-        workplace_fixture.location = { ...point };
-    }
 
     function addEmail(event) {
         if (event.key !== 'Enter' || emails.length >= data.free_spots)
@@ -58,10 +43,7 @@
     }
 
     async function upsert() {
-        if (!selectedFile) {
-            alert('Please select a spreadsheet file before submitting.');
-            return;
-        }
+        if (!selectedFile) return alert('Please select a spreadsheet file before submitting.');
 
         const employees = [];
         await Promise.all(emails.map(async (email) => {
@@ -78,7 +60,6 @@
             });
         }));
 
-        workplace_fixture.location = { ...point };
         workplace_fixture.file_id = selectedFile.id;
         workplace_fixture.employees = employees;
 
@@ -105,7 +86,7 @@
 
 <div class="form-question">
     <label class="question-title" for="file_id">Link Spreadsheet:</label>
-    <button class="btn-secondary" on:click={(e) => { e.preventDefault(); showPicker = true; }}>
+    <button class="btn-secondary" on:click={() => showPicker = true}>
         {#if selectedFile} Selected {:else} Select {/if}
     </button>
 </div>
@@ -126,8 +107,6 @@
 <div class="form-question">
     Remaining: {emails.length} of {data.free_spots}
     <input
-        id="email"
-        type="email"
         bind:value={currentEmail}
         on:keydown={addEmail}
         placeholder={emails.length >= data.free_spots ? 'No more spots available' : 'Enter email address and press Enter'}
@@ -144,12 +123,12 @@
 <div class="form-question">
     <label class="question-title">Location:</label>
     <div style="height: 300px; margin: 1rem 0; border-radius: 4px; overflow: hidden;">
-        <Map bind:point height={300} />
+        <Map bind:point={workplace_fixture.location} height={300} />
     </div>
 </div>
 
 <div class="form-question">
-    Proximity (m): <input id="proximity" name="proximity" type="number" min="10" max="10000" required bind:value={workplace_fixture.proximity}/>
+    Proximity (m): <input name="proximity" type="number" min="10" max="10000" required bind:value={workplace_fixture.proximity}/>
 </div>
 
 <div class="form-section">
