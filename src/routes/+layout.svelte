@@ -1,6 +1,7 @@
 
 
 <script lang="ts">
+	import '../app.css';
 	import { goto } from '$app/navigation';
 	import { pb, pbUser, login } from '$lib/pocketbase';
 	import { invalidateAll } from '$app/navigation';
