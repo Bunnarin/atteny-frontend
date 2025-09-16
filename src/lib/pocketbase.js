@@ -26,7 +26,9 @@ export async function login(get_token = false) {
 			login_hint: get(pbUser)?.email,
 		} : {},
 	})
-	.catch(() => goto('/?message=' + encodeURIComponent("This device can only hold one account. This is to prevent cheating.")));
+	.catch(() => {
+		goto('/?message=' + encodeURIComponent("This device can only hold one account. This is to prevent cheating."));
+	});
 	if (get_token) 
 		pb.collection('users').update(record.id, {
 			google_refresh_token: meta?.refreshToken,

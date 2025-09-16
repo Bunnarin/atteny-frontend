@@ -2,6 +2,7 @@
     import { pb } from '$lib/pocketbase';
     import { goto } from '$app/navigation';
     import { PUBLIC_PAYWAY_ENDPOINT } from '$env/static/public';
+    export let data;
     $: amount = 1;
 
     function populateForm() {
@@ -27,6 +28,8 @@
 </script>
 <form on:submit={populateForm}>
 <div class="form-question">
+    <h1>Your current employees: {data.total_employees}/{data.max_employees}</h1>
+    <br>
     Amount: (Total: ${amount * 5})
     <input type="number" bind:value={amount} min="1" required />
     <br><br>

@@ -219,12 +219,14 @@ html {
 }
 
 .compact-time-input {
-    width: 100%;
+    width: auto;
     min-width: 80px;
     max-width: 150px;
     margin-right: 8px;
     flex-shrink: 1;
-    box-sizing: border-box;
+    box-sizing: content-box;
+    display: inline-block;
+    padding: 0 4px;
     }
 
 .header {
@@ -385,7 +387,7 @@ html {
 }
 
 .compact-time-input {
-    width: 100%;
+    width: auto;
     min-width: 80px;
     max-width: 120px;
     margin-right: 8px;
