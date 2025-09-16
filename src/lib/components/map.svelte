@@ -91,9 +91,36 @@
     }
 
     function initMap() {
-        const latlon = [normalizeCoordinate(point.lat), normalizeCoordinate(point.lon)];
+        // Check if we're at default coordinates (0,0)
+        const isDefaultLocation = point.lat === 0 && point.lon === 0;
+        let initialLatLon;
 
-        map = L.map(mapEl, { zoomControl: false }).setView(latlon, defaultZoomLevel);
+        if (isDefaultLocation && navigator.geolocation) {
+            // Try to get user's current position
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude: lat, longitude: lon } = position.coords;
+                    // Update the point with user's location
+                    select(lat, lon, true);
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                    // Fallback to default coordinates if location access is denied
+                    useDefaultCoordinates();
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 30000,
+                    timeout: 27000
+                }
+            );
+            // Use default coordinates while waiting for geolocation
+            initialLatLon = [0, 0];
+        } else {
+            initialLatLon = [normalizeCoordinate(point.lat), normalizeCoordinate(point.lon)];
+        }
+
+        map = L.map(mapEl, { zoomControl: false }).setView(initialLatLon, defaultZoomLevel);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -106,7 +133,7 @@
         L.Icon.Default.imagePath = "";
 
         // Create the marker at the initial position
-        marker = L.marker(latlon, {
+        marker = L.marker(initialLatLon, {
             draggable: true,
             autoPan: true,
         }).addTo(map);
@@ -134,22 +161,6 @@
             position: 'topright'
         }).addTo(map);
 
-        // Add locate control
-        // L.control.locate({
-        //     position: 'topright',
-        //     drawCircle: false,
-        //     setView: 'untilPanOrZoom',
-        //     keepCurrentZoomLevel: true,
-        //     locateOptions: {
-        //         enableHighAccuracy: true,
-        //         maximumAge: 15000,
-        //         timeout: 10000
-        //     },
-        //     strings: {
-        //         title: 'Center on me'
-        //     }
-        // }).addTo(map);
-
         // Start watching user's location
         if (navigator.geolocation) {
             watchId = navigator.geolocation.watchPosition(
@@ -168,6 +179,7 @@
                 }
             );
         }
+        centerOnUser();
     }
 
     function destroyMap() {
@@ -251,6 +263,13 @@
         }
 
         resetSearch();
+    }
+
+    // Helper function to handle default coordinates
+    function useDefaultCoordinates() {
+        const defaultLatLon = [0, 0];
+        map?.setView(defaultLatLon, defaultZoomLevel);
+        marker?.setLatLng(defaultLatLon);
     }
 
     onMount(() => {
