@@ -9,6 +9,9 @@
 
     export let data;
 
+    // state
+    let saving = false;
+
     // if the current user doesnt have refresh_token, prompt them for it.
     if (!get(pbUser)?.google_refresh_token) 
 		login(true);
@@ -31,7 +34,8 @@
     onMount(async () => await import('@googleworkspace/drive-picker-element'));
 
     function addEmail(event) {
-        if (event.key !== 'Enter' || emails.length >= data.free_spots)
+        console.log(event.key);
+        if (event.key !== 'Enter' && event.key !== " ")
             return;
         event.preventDefault();
         if (emails.includes(currentEmail.trim()) || !currentEmail.includes('@'))
@@ -49,7 +53,7 @@
 
     async function upsert() {
         if (!selectedFile) return alert('Please select a spreadsheet file before submitting.');
-
+        saving=true;
         const employees = [];
         await Promise.all(emails.map(async (email) => {
             await pb.collection('users').getFirstListItem(`email = "${email}"`)
@@ -74,7 +78,7 @@
             await pb.collection('workplace').create(workplace_fixture);
         }
         
-        workplaceStore.refresh();
+        await workplaceStore.refresh();
         goto('/');
     }
 </script>
@@ -112,7 +116,7 @@
     <input
         bind:value={currentEmail}
         on:keydown={addEmail}
-        placeholder={emails.length >= data.free_spots ? 'No more spots available' : 'Enter email address and press Enter'}
+        placeholder={emails.length >= data.free_spots ? 'No more spots available' : 'Enter email and press space'}
         readonly={emails.length >= data.free_spots}
     />
     {#each emails as email, index}
@@ -145,5 +149,7 @@
 </div>
 
 <div class="form-actions">
-    <button class="btn-primary" on:click={upsert}>Save Changes</button>
+    <button class="btn-primary" disabled={saving} on:click={upsert}>
+        {#if saving}saving{:else}save{/if}
+    </button>
 </div>

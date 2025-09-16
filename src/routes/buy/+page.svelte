@@ -14,10 +14,11 @@
                     input.type = 'hidden';
                     input.name = key;
                     if (key == "hash") {
-                        // doing this because pocketbase doesnt have digest to base64
+                        // doing this because pocketbase cannot encode base64
                         const byteArray = new Uint8Array(value.match(/[\da-f]{2}/gi).map(h => parseInt(h, 16)));
                         input.value = btoa(String.fromCharCode(...byteArray));
-                    } else 
+                    }
+                    else 
                         input.value = value;
                     form?.appendChild(input);
                 });
@@ -30,7 +31,7 @@
 <div class="form-question">
     <h1>Your current employees: {data.total_employees}/{data.max_employees}</h1>
     <br>
-    Amount: (Total: ${amount * 5})
+    Amount: (Total: ${amount * data.unit_price})
     <input type="number" bind:value={amount} min="1" required />
     <br><br>
     <button type="submit" class="btn-primary">Buy</button>

@@ -25,7 +25,8 @@
 		<button class="btn-primary" disabled={loggin_in}
 			on:click={async () => {
 				loggin_in=true;
-				login(false).then(() => loggin_in=false);
+				await login(false);
+				window.location.reload();
 				}}>
 			{#if loggin_in}Logging in...{:else}Login{/if}
 		</button>
