@@ -153,7 +153,7 @@
     });
 </script>
 
-<div class="map-wrapper" style="{height ? `height:${height}px` : null};">
+<div class="map-wrapper" style="height: {height}px">
     <div class="map-search">
         <div class="form-field m-0">
             {#if isSearching}
@@ -171,11 +171,16 @@
                     </button>
                 </div>
             {/if}
-            <input type="text" placeholder="Search address..." bind:value={searchTerm} />
+            <input 
+                type="text" 
+                placeholder="Search address..." 
+                bind:value={searchTerm}
+                class="search-input"
+            />
         </div>
         {#if searchTerm.length && searchResults.length}
             <div class="dropdown dropdown-sm dropdown-block">
-                {#each searchResults as result, i}
+                {#each searchResults as result}
                     <button
                         type="button"
                         class="dropdown-item"
@@ -190,42 +195,128 @@
     <div bind:this={mapEl} class="map-box"></div>
 </div>
 
-<style lang="scss">
+<style>
     .map-wrapper {
         position: relative;
-        display: block;
-        height: 100%;
         width: 100%;
+        height: 100%;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
+
     .map-box {
-        z-index: 1;
-        height: 100%;
         width: 100%;
+        height: 100%;
+        z-index: 1;
     }
+
     .map-search {
         position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 500px;
         z-index: 2;
-        top: 10px;
-        width: 70%;
-        max-width: 400px;
-        margin-left: 15%;
-        height: auto;
-        input {
-            opacity: 0.7;
-            background: var(--baseColor);
-            border: 0;
-            box-shadow: 0 0 3px 0 var(--shadowColor);
-            transition: opacity var(--baseAnimationSpeed);
-        }
-        .dropdown {
-            max-height: 150px;
-            border: 0;
-            box-shadow: 0 0 3px 0 var(--shadowColor);
-        }
-        &:focus-within {
-            input {
-                opacity: 1;
-            }
-        }
+    }
+
+    .form-field {
+        position: relative;
+        margin-bottom: 0;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 8px 12px 8px 36px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background-color: white;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-field-addon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding-left: 12px;
+        pointer-events: none;
+    }
+
+    .btn-transparent {
+        background: transparent;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        pointer-events: auto;
+        color: #64748b;
+    }
+
+    .btn-transparent:hover {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 50%;
+    }
+
+    .dropdown {
+        position: absolute;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        margin-top: 4px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        text-align: left;
+        background: none;
+        border: none;
+        font-size: 14px;
+        color: #1a202c;
+        cursor: pointer;
+        transition: background-color 0.1s;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f7fafc;
+    }
+
+    .loader-xs {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #e2e8f0;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    :global(.leaflet-top) {
+        top: 60px;
+    }
+
+    :global(.leaflet-touch .leaflet-bar a) {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
     }
 </style>

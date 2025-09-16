@@ -121,7 +121,7 @@
 </div>
 
 <div class="form-question">
-    <label class="question-title">Location:</label>
+    Location:
     <div style="height: 300px; margin: 1rem 0; border-radius: 4px; overflow: hidden;">
         <Map bind:point={workplace_fixture.location} height={300} />
     </div>
