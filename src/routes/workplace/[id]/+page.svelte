@@ -34,8 +34,7 @@
     onMount(async () => await import('@googleworkspace/drive-picker-element'));
 
     function addEmail(event) {
-        console.log(event.key);
-        if (event.key !== 'Enter' && event.key !== " ")
+        if (event.data !== 'Enter' && event.data !== " ")
             return;
         event.preventDefault();
         if (emails.includes(currentEmail.trim()) || !currentEmail.includes('@'))
@@ -72,11 +71,12 @@
         workplace_fixture.file_id = selectedFile.id;
         workplace_fixture.employees = employees;
 
-        if (data.workplace) {
-            await pb.collection('workplace').update(data.workplace.id, workplace_fixture);
-        } else {
-            await pb.collection('workplace').create(workplace_fixture);
-        }
+        if (data.workplace) 
+            await pb.collection('workplace').update(data.workplace.id, workplace_fixture)
+                .catch(err => alert(err));
+        else 
+            await pb.collection('workplace').create(workplace_fixture)
+                .catch(err => alert(err));
         
         await workplaceStore.refresh();
         goto('/');
@@ -95,7 +95,7 @@
 
 <div class="form-question">
     <label class="question-title" for="file_id">Link Spreadsheet:</label>
-    <button class="btn-secondary" on:click={() => showPicker = true}>
+    <button class="btn-secondary" on:click={() => {showPicker=true; document.querySelector('drive-picker').visible=true;}}>
         {#if selectedFile} Selected {:else} Select {/if}
     </button>
 </div>
@@ -115,7 +115,7 @@
     Remaining: {emails.length} of {data.free_spots}
     <input
         bind:value={currentEmail}
-        on:keydown={addEmail}
+        on:input={addEmail}
         placeholder={emails.length >= data.free_spots ? 'No more spots available' : 'Enter email and press space'}
         readonly={emails.length >= data.free_spots}
     />

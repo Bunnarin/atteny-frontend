@@ -11,7 +11,7 @@
         handledRequests = [...handledRequests, id];
         pb.send(`/approve/${id}`, { method: 'POST' })
             .then(() => requestStore.refresh())
-            .catch(error => goto('/?message=' + encodeURIComponent(error.message)));
+            .catch(error => alert(error.message));
     }
     function reject(id) {
         // confirm first
@@ -19,7 +19,7 @@
         handledRequests = [...handledRequests, id];
         pb.send(`/reject/${id}`, { method: 'POST' })
             .then(() => requestStore.refresh())
-            .catch(error => goto('/?message=' + encodeURIComponent(error.message)));
+            .catch(error => alert(error.message));
     }
 </script>
 

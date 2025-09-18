@@ -8,9 +8,9 @@
     if (!get(pbUser))
         login(false)
             .then(() => goto(`/subscribe/${$page.params.id}`))
-            .catch(error => goto('/?message=' + encodeURIComponent(error.message)));
+            .catch(error => {alert(error.message); goto('/');});
 
     pb.send(`/subscribe/${$page.params.id}`, {method: 'POST'})
         .then(() => workplaceStore.refresh().then(() => goto('/')))
-        .catch(error => goto('/?message=' + encodeURIComponent(error.message)));    
+        .catch(error => {alert(error.message); goto('/');});    
 </script>

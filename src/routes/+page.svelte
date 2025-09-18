@@ -1,7 +1,6 @@
 <script>
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
-    import { page } from '$app/stores';
     import { writable, get } from 'svelte/store';
     import { pb, pbUser } from '$lib/pocketbase';
     import { requestStore } from '$lib/stores/request.js';
@@ -20,11 +19,7 @@
     // for the modal
     let date = new Date().toISOString().split('T')[0];
     let reason = '';
-    let modalError;
     let submitting = false;
-
-    // Add error message state
-    $: errorMessage = $page.url.searchParams.get('message');
 
     // Load clock-in statuses from localStorage
     function loadClockInStatuses() {
@@ -161,12 +156,11 @@
                     locationError = `You are ${distance.toFixed(2)} m away from ${workplace.name}. You must be within ${workplace.proximity} m to clock in.`;
                 } else {
                     pb.send(`/clockin/${workplace.id}`, {method: 'POST'})
-                    .then(response => {
-                        successMessage = `Successfully clocked in to ${workplace.name}! Distance: ${distance.toFixed(2)} m`;
+                    .then(() => {
+                        successMessage = `Successfully clocked in!`;
                         // Record the clock-in for this time window
-                        if (timeCheck.windowIndex >= 0) {
+                        if (timeCheck.windowIndex >= 0) 
                             recordClockIn(workplace.id, timeCheck.windowIndex);
-                        }
                     })
                     .catch(error => locationError = error);
                 }
@@ -189,12 +183,6 @@
         loadClockInStatuses();
     });
 </script>
-
-{#if errorMessage}
-    <div class="error-message">
-        {decodeURIComponent(errorMessage)}
-    </div>
-{/if}
 
 {#if $pbUser}
 <div class="form-actions">
@@ -253,16 +241,12 @@
 {#if modalWorkplaceId}
 <div class="modal-overlay">
     <div class="modal-content">
-        {#if modalError}
-            <div class="error">{modalError}</div>
-        {/if}
         <div class="form-question">
             Date: <input type="date" bind:value={date} required min={new Date().toISOString().split('T')[0]} />
             <br><br>
             Reason: <input bind:value={reason} required maxlength="255"/>
         </div>
         <button class="btn-primary" disabled={submitting} on:click={() => {
-            modalError = '';
             submitting = true;
             pb.collection('request').create({
                 workplace: modalWorkplaceId,
@@ -271,7 +255,7 @@
                 reason,
             })
             .then(() => {modalWorkplaceId = ''; requestStore.refresh(); reason=""; date="";})
-            .catch(() => modalError = "you have already requested leave for this date.")
+            .catch(() => alert('you have already requested leave for this date'))
             .then(() => submitting = false);
         }}>
             {#if submitting}Submitting...{:else}Submit{/if}

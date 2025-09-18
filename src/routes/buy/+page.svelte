@@ -1,7 +1,7 @@
 <script>
     import { pb } from '$lib/pocketbase';
     import { goto } from '$app/navigation';
-    import { PUBLIC_PAYWAY_ENDPOINT } from '$env/static/public';
+    import { PUBLIC_PAYWAY_ENDPOINT, PUBLIC_UNIT_PRICE } from '$env/static/public';
     export let data;
     $: amount = 1;
 
@@ -24,14 +24,13 @@
                 });
                 form?.submit();
             })
-            .catch(error => goto('/?message=' + encodeURIComponent(error.message)));
     }
 </script>
 <form on:submit={populateForm}>
 <div class="form-question">
     <h1>Your current employees: {data.total_employees}/{data.max_employees}</h1>
     <br>
-    Amount: (Total: ${amount * data.unit_price})
+    Amount: (Total: ${amount * PUBLIC_UNIT_PRICE})
     <input type="number" bind:value={amount} min="1" required />
     <br><br>
     <button type="submit" class="btn-primary">Buy</button>
