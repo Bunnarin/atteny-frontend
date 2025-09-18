@@ -38,10 +38,7 @@
 
     function panInside(debounce = 200) {
         clearTimeout(panTimeoutId);
-        panTimeoutId = setTimeout(() => {
-            marker?.setLatLng([point.lat, point.lon]);
-            map?.panInside([point.lat, point.lon], { padding: [20, 40] });
-        }, debounce);
+        panTimeoutId = setTimeout(() => marker?.setLatLng([point.lat, point.lon]), debounce);
     }
 
     function centerOnUser() {

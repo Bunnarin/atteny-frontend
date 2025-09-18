@@ -1,6 +1,5 @@
 <script>
     import { pb } from '$lib/pocketbase';
-    import { goto } from '$app/navigation';
     import { PUBLIC_PAYWAY_ENDPOINT, PUBLIC_UNIT_PRICE } from '$env/static/public';
     export let data;
     $: amount = 1;

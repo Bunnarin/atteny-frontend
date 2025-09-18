@@ -10,6 +10,6 @@ export const load = async () => {
     
     return {
         total_employees,
-        max_employees: get(pbUser).free_spots + total_employees
+        max_employees: get(pbUser).max_employees
     }
 }

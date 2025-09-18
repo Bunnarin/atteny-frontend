@@ -1,12 +1,15 @@
 import { workplaceStore } from '$lib/stores/workplace';
-import { pbUser } from '$lib/pocketbase';
+import { pb, pbUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
 export const prerender = false;
 export const ssr = false;
 
 export const load = async ({ params }) => {
-    // calling the api all the time if I call refresh
+    let total_employees = 0;
+    await pb.collection('total_employees').getOne(get(pbUser).id)
+    .then(({value}) => total_employees = value)
+    .catch(() => {});
     const workplaces = get(workplaceStore);
     let workplace = null;
     if (params.id != "new") 
@@ -14,6 +17,6 @@ export const load = async ({ params }) => {
     
     return {
         workplace,
-        free_spots: get(pbUser).free_spots + (workplace?.employees?.length || 0),
+        free_spots: get(pbUser).max_employees - total_employees + (workplace?.employees?.length || 0),
     }
 }

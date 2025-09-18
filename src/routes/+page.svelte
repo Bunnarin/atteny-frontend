@@ -3,7 +3,6 @@
     import { onMount } from 'svelte';
     import { writable, get } from 'svelte/store';
     import { pb, pbUser } from '$lib/pocketbase';
-    import { requestStore } from '$lib/stores/request.js';
 
     // Store for clock-in statuses
     const clockInStatuses = writable({});
@@ -199,7 +198,8 @@
         <button class="btn-primary" on:click={() => copy_link(workplace)}>
             {selectedWorkplaceId === workplace.id ? 'Copied!' : 'Invite Link'}
         </button>
-        <button class="btn-primary" on:click={() => goto(`/request/${workplace.id}`)} disabled={!data.requests.filter(r => r.workplace === workplace.id).length}>
+        <button class="btn-primary" on:click={() => goto(`/request/${workplace.id}`)} 
+            disabled={!data.requests.filter(r => r.workplace === workplace.id).length}>
             pending requests
         </button>
     </div>
@@ -213,9 +213,6 @@
     {/if}
 
     {#if successMessage}
-        <script>
-            clockingIn = false;
-        </script>
         <div class="success">{successMessage}</div>
     {/if}
 
@@ -225,8 +222,7 @@
             <button
                 class="btn-primary"
                 on:click={() => clockIn(workplace)}
-                disabled={!isWithinTimeWindow(workplace.id, workplace.rules, $clockInStatuses).allowed}
-            >
+                disabled={!isWithinTimeWindow(workplace.id, workplace.rules, $clockInStatuses).allowed}>
                 {#if clockingIn && !locationError && !successMessage}
                     Clocking In...
                 {:else}
@@ -254,7 +250,7 @@
                 date,
                 reason,
             })
-            .then(() => {modalWorkplaceId = ''; requestStore.refresh(); reason=""; date="";})
+            .then(() => {modalWorkplaceId = ''; reason=""; date="";})
             .catch(() => alert('you have already requested leave for this date'))
             .then(() => submitting = false);
         }}>

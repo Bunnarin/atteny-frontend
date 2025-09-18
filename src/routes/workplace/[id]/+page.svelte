@@ -34,7 +34,7 @@
     onMount(async () => await import('@googleworkspace/drive-picker-element'));
 
     function addEmail(event) {
-        if (event.data !== 'Enter' && event.data !== " ")
+        if (event.data !== " ")
             return;
         event.preventDefault();
         if (emails.includes(currentEmail.trim()) || !currentEmail.includes('@'))
@@ -42,12 +42,6 @@
         if (currentEmail.trim()) 
             emails = [...emails, currentEmail.trim()];
         currentEmail = '';
-    }
-
-    async function delete_workplace() {
-        if (!confirm('delete?')) return;
-        await pb.collection('workplace').delete(data.workplace.id);
-        goto('/');
     }
 
     async function upsert() {
@@ -70,7 +64,7 @@
 
         workplace_fixture.file_id = selectedFile.id;
         workplace_fixture.employees = employees;
-
+        
         if (data.workplace) 
             await pb.collection('workplace').update(data.workplace.id, workplace_fixture)
                 .catch(err => alert(err));
@@ -85,7 +79,13 @@
 
 {#if data.workplace}
 <div class="form-actions">
-    <button class="btn-primary" on:click={delete_workplace}>Delete</button>
+    <button class="btn-primary" on:click={() => {
+        if (!confirm('delete?')) return;
+        pb.collection('workplace').delete(data.workplace.id)
+        .then(async () => await workplaceStore.refresh())
+        .catch(err => alert(err));
+        goto('/');
+    }}>Delete</button>
 </div>
 {/if}
 
