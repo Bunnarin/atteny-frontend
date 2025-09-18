@@ -29,16 +29,12 @@
     $: search(searchTerm);
 
     $: if (point.lat && point.lon) {
-        panInside();
+        clearTimeout(panTimeoutId);
+        panTimeoutId = setTimeout(() => marker?.setLatLng([point.lat, point.lon]), 200);
     }
 
     function normalizeCoordinate(coord) {
         return +(+coord).toFixed(6);
-    }
-
-    function panInside(debounce = 200) {
-        clearTimeout(panTimeoutId);
-        panTimeoutId = setTimeout(() => marker?.setLatLng([point.lat, point.lon]), debounce);
     }
 
     function centerOnUser() {
@@ -271,9 +267,7 @@
 
     onMount(() => {
         initMap();
-        return () => {
-            destroyMap();
-        };
+        return () => destroyMap();
     });
 </script>
 

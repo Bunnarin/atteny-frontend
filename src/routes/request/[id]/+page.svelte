@@ -1,6 +1,5 @@
 <script>
     import { pb } from '$lib/pocketbase';
-    import { goto } from '$app/navigation';
     import { requestStore } from '$lib/stores/request.js';
     export let data;
     let handledRequests = [];
@@ -23,7 +22,7 @@
     }
 </script>
 
-<h1>Pending Requests</h1>
+<h1 class="form-title">Pending Requests</h1>
 
 {#each data.requests as request}
     {#if !handledRequests.includes(request.id)}
