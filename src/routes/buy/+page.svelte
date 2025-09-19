@@ -7,19 +7,13 @@
 
     async function populateForm() {
         paying = true;
-        const data = await pb.send(`/buy/${amount}`, {method: 'POST'})
+        const data = await pb.send(`/buy/${amount}`, {method: 'POST'});
         const form = document.getElementById('payway_form');
         Object.entries(data).forEach(([key, value]) => {
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = key;
-            if (key == "hash") {
-                // doing this because pocketbase cannot encode base64
-                const byteArray = new Uint8Array(value.match(/[\da-f]{2}/gi).map(h => parseInt(h, 16)));
-                input.value = btoa(String.fromCharCode(...byteArray));
-            }
-            else 
-                input.value = value;
+            input.value = value;
             form?.appendChild(input);
         });
         form?.submit();

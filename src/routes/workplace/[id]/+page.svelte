@@ -13,8 +13,12 @@
     let saving = false;
 
     // if the current user doesnt have refresh_token, prompt them for it.
-    if (!get(pbUser)?.google_refresh_token) 
-		login(true);
+    if (!get(pbUser)?.google_refresh_token)  {
+        if (!confirm('Please Login again to access this page. This is a one-time setup.')) 
+            goto('/');
+        else
+            login(true);
+    }
         
     // Initialize workplace_fixture with data or defaults
     const workplace_fixture = {
@@ -26,23 +30,12 @@
         employees: data.workplace?.employees || [],
         proximity: data.workplace?.proximity || 10
     }
-    let emails = JSON.parse(JSON.stringify(data.workplace?.expand?.employees?.map(e => e.email) || []));
+    let emails = data.workplace?.expand?.employees?.map(e => e.email) || [];
     let currentEmail = '';
     let selectedFile = data.workplace?.file_id;
     let showPicker = false;
 
     onMount(async () => await import('@googleworkspace/drive-picker-element'));
-
-    function addEmail(event) {
-        if (event.data !== " ")
-            return;
-        event.preventDefault();
-        if (emails.includes(currentEmail.trim()) || !currentEmail.includes('@'))
-            return;
-        if (currentEmail.trim()) 
-            emails = [...emails, currentEmail.trim()];
-        currentEmail = '';
-    }
 
     async function upsert() {
         if (!selectedFile) return alert('Please select a spreadsheet file before submitting.');
@@ -52,6 +45,7 @@
             await pb.collection('users').getFirstListItem(`email = "${email}"`)
             .then(user => employees.push(user.id))
             .catch(async () => {
+                // create user if not exist
                 const password = (Math.random() + 1).toString(36).substring(7);
                 await pb.collection('users').create({
                     email: email,
@@ -115,9 +109,14 @@
     Remaining: {emails.length} of {data.free_spots}
     <input
         bind:value={currentEmail}
-        on:input={addEmail}
         placeholder={emails.length >= data.free_spots ? 'No more spots available' : 'Enter email and press space'}
         readonly={emails.length >= data.free_spots}
+        on:input={(e) => {
+            if (e.data !== " " || emails.includes(currentEmail.trim()) || !currentEmail.includes('@'))
+                return; // make sure that we listen to space, that the user is unique and valid
+            emails = [...emails, currentEmail.trim()];
+            currentEmail = '';
+        }}
     />
     {#each emails as email, index}
     <span class="employee-item">

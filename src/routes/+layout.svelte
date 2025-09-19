@@ -3,14 +3,30 @@
 <script lang="ts">
 	import '../app.css';
 	import { goto } from '$app/navigation';
-	import { pb, pbUser, login } from '$lib/pocketbase';
-	import { invalidateAll } from '$app/navigation';
-	let loggin_in = false;	
-	async function logout() {
-		pb.authStore.clear();
-		await invalidateAll();
-		goto('/');
-	}
+	import { pbUser, login, logout } from '$lib/pocketbase';
+	import { onMount } from 'svelte';
+
+	let loggin_in = false;
+	let deferredPrompt;
+    let installAvailable = false;
+    
+    onMount(() => {
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installAvailable = true;
+        });
+
+        // Listen for appinstalled event
+        window.addEventListener('appinstalled', () => installAvailable = false);
+    });
+
+    async function installPWA() {
+        deferredPrompt.prompt();
+        deferredPrompt = null;
+        installAvailable = false;
+    }
 </script>
 
 <div class="header">
@@ -18,6 +34,9 @@
 	
 	{#if $pbUser}
 		<div class="user">
+			{#if installAvailable}
+				<button class="btn-primary" on:click={installPWA}>Install</button>
+			{/if}
 			<button class="btn-primary" on:click={() => goto('/buy')}>Buy</button>
 			<button class="btn-secondary" on:click={logout}>Logout</button>
 		</div>
