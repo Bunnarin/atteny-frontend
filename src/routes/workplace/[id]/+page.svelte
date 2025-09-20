@@ -40,24 +40,9 @@
     async function upsert() {
         if (!selectedFile) return alert('Please select a spreadsheet file before submitting.');
         saving=true;
-        const employees = [];
-        await Promise.all(emails.map(async (email) => {
-            await pb.collection('users').getFirstListItem(`email = "${email}"`)
-            .then(user => employees.push(user.id))
-            .catch(async () => {
-                // create user if not exist
-                const password = (Math.random() + 1).toString(36).substring(7);
-                await pb.collection('users').create({
-                    email: email,
-                    password: password,
-                    passwordConfirm: password,
-                })
-                .then(newUser => employees.push(newUser.id));
-            });
-        }));
 
         workplace_fixture.file_id = selectedFile.id;
-        workplace_fixture.employees = employees;
+        workplace_fixture.employees = emails;
         
         if (data.workplace) 
             await pb.collection('workplace').update(data.workplace.id, workplace_fixture)
