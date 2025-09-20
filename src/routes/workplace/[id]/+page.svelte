@@ -27,10 +27,10 @@
         location: data.workplace?.location || { lat: 0, lon: 0 },
         rules: data.workplace?.rules ? JSON.parse(JSON.stringify(data.workplace.rules)) : [],
         employer: get(pbUser)?.id,
-        employees: data.workplace?.employees || [],
+        employees: data.workplace?.expand?.employees?.map(e => e.email) || [],
         proximity: data.workplace?.proximity || 10
     }
-    let emails = data.workplace?.expand?.employees?.map(e => e.email) || [];
+    let emails = workplace_fixture.employees;
     let currentEmail = '';
     let selectedFile = data.workplace?.file_id;
     let showPicker = false;
