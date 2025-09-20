@@ -13,7 +13,7 @@
     let saving = false;
 
     // if the current user doesnt have refresh_token, prompt them for it.
-    if (!get(pbUser)?.google_refresh_token)  {
+    if (!get(pbUser)?.google_refresh_token) {
         if (!confirm('Please Login again to access this page. This is a one-time setup.')) 
             goto('/');
         else
@@ -38,10 +38,9 @@
     onMount(async () => await import('@googleworkspace/drive-picker-element'));
 
     async function upsert() {
-        if (!selectedFile) return alert('Please select a spreadsheet file before submitting.');
         saving=true;
 
-        workplace_fixture.file_id = selectedFile.id;
+        workplace_fixture.file_id = selectedFile ? selectedFile.id : '';
         workplace_fixture.employees = emails;
         
         if (data.workplace) 
@@ -58,9 +57,9 @@
 
 {#if data.workplace}
 <div class="form-actions">
-    <button class="btn-primary" on:click={() => {
+    <button class="btn-primary" on:click={async () => {
         if (!confirm('delete?')) return;
-        pb.collection('workplace').delete(data.workplace.id)
+        await pb.collection('workplace').delete(data.workplace.id)
         .then(async () => await workplaceStore.refresh())
         .catch(err => alert(err));
         goto('/');
@@ -73,7 +72,7 @@
 </div>
 
 <div class="form-question">
-    <label class="question-title" for="file_id">Link Spreadsheet:</label>
+    <label class="question-title" for="file_id">Link Spreadsheet (If not, we will create one for you):</label>
     <button class="btn-secondary" on:click={() => {showPicker=true; document.querySelector('drive-picker').visible=true;}}>
         {#if selectedFile} Selected {:else} Select {/if}
     </button>

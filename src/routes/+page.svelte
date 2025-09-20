@@ -15,8 +15,9 @@
     let modalWorkplaceId = '';
     let clockingIn = false;
 
+    const [today, _] = new Date().toISOString().split('T');
     // for the modal
-    let date = new Date().toISOString().split('T')[0];
+    let date = today;
     let reason = '';
     let submitting = false;
 
@@ -26,31 +27,23 @@
         const statuses = {};
         const keys = Object.keys(localStorage);
         keys.forEach(key => {
-            if (key.startsWith('clockin_')) {
+            if (key.startsWith('clockin_')) 
                 statuses[key] = localStorage.getItem(key) === 'true';
-            }
         });
         clockInStatuses.set(statuses);
     }
 
     // Clean up old localStorage entries (older than 30 days)
     function cleanupOldClockIns() {
-        if (typeof window === 'undefined') return;
-        const keys = Object.keys(localStorage);
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        keys.forEach(key => {
-            if (key.startsWith('clockin_')) {
-                const parts = key.split('_');
-                if (parts.length >= 3) {
-                    const dateStr = parts[2];
-                    const entryDate = new Date(dateStr);
-                    if (entryDate < thirtyDaysAgo) {
-                        localStorage.removeItem(key);
-                    }
-                }
-            }
+        Object.keys(localStorage).forEach(key => {
+            if (!key.startsWith('clockin_')) return;
+            const [_, __, dateStr] = key.split('_');
+            const entryDate = new Date(dateStr);
+            if (entryDate < thirtyDaysAgo)
+                localStorage.removeItem(key);
         });
         // Reload statuses after cleanup
         loadClockInStatuses();
@@ -74,15 +67,13 @@
     }
 
     function hasClockedInToday(workplaceId, windowIndex, statuses) {
-        if (typeof window === 'undefined') return false;
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        // if (typeof window === 'undefined') return false;
         const key = `clockin_${workplaceId}_${today}_${windowIndex}`;
         return statuses[key] === true;
     }
 
     function recordClockIn(workplaceId, windowIndex) {
         if (typeof window === 'undefined') return;
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
         const key = `clockin_${workplaceId}_${today}_${windowIndex}`;
         localStorage.setItem(key, 'true');
         clockInStatuses.update(statuses => {
@@ -131,11 +122,10 @@
         // Check time restrictions first
         const timeCheck = isWithinTimeWindow(workplace.id, workplace.rules, get(clockInStatuses));
         if (!timeCheck.allowed) {
-            if (timeCheck.reason === 'already_clocked_in') {
+            if (timeCheck.reason === 'already_clocked_in') 
                 alert('You have already clocked in for this time window today.');
-            } else {
+            else 
                 alert('Clock-in is not allowed at this time. Please check your workplace time rules.');
-            }
             return;
         }
 
@@ -154,7 +144,7 @@
                 if (distance > workplace.proximity) {
                     locationError = `You are ${distance.toFixed(2)} m away from ${workplace.name}. You must be within ${workplace.proximity} m to clock in.`;
                 } else {
-                    pb.send(`/clockin/${workplace.id}`, {method: 'POST'})
+                    pb.send(`/clockin/${workplace.id}`, {method: 'POST', body: {timezone: Intl.DateTimeFormat().resolvedOptions().timeZone}})
                     .then(() => {
                         successMessage = `Successfully clocked in!`;
                         // Record the clock-in for this time window
