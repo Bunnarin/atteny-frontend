@@ -7,9 +7,9 @@ export const ssr = false;
 
 export const load = async ({ params }) => {
     let total_employees = 0;
-    await pb.collection('total_employees').getOne(get(pbUser).id)
-    .then(({value}) => total_employees = value)
-    .catch(() => {});
+    await pb.collection('total_employees').getOne(get(pbUser)?.id)
+        .then(({value}) => total_employees = value)
+        .catch(() => {});
     const workplaces = get(workplaceStore);
     let workplace = null;
     if (params.id != "new") 

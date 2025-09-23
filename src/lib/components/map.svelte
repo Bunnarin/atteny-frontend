@@ -8,7 +8,6 @@
     import markerIconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
     import markerShadowUrl from "leaflet/dist/images/marker-shadow.png";
 
-    export let height = 225;
     export let point = { lat: 0, lon: 0 };
 
     let map;
@@ -33,36 +32,7 @@
         panTimeoutId = setTimeout(() => marker?.setLatLng([point.lat, point.lon]), 200);
     }
 
-    function normalizeCoordinate(coord) {
-        return +(+coord).toFixed(6);
-    }
-
-    function centerOnUser() {
-        if (userLocation) {
-            const { lat, lon } = userLocation;
-            map?.setView([lat, lon], defaultZoomLevel);
-        } else if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude: lat, longitude: lon } = position.coords;
-                    userLocation = { lat, lon };
-                    updateUserLocationMarker(lat, lon);
-                    map?.setView([lat, lon], defaultZoomLevel);
-                },
-                (error) => {
-                    console.error("Error getting location:", error);
-                    alert("Unable to get your location. Please check your browser permissions.");
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 30000,
-                    timeout: 27000
-                }
-            );
-        } else {
-            alert("Geolocation is not supported by your browser");
-        }
-    }
+    const normalizeCoordinate = coord => +(+coord).toFixed(6);
 
     function updateUserLocationMarker(lat, lon) {
         if (!userLocationMarker) {
@@ -81,109 +51,6 @@
         } else {
             userLocationMarker.setLatLng([lat, lon]);
         }
-    }
-
-    function initMap() {
-        // Check if we're at default coordinates (0,0)
-        const isDefaultLocation = point.lat === 0 && point.lon === 0;
-        let initialLatLon;
-
-        if (isDefaultLocation && navigator.geolocation) {
-            // Try to get user's current position
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude: lat, longitude: lon } = position.coords;
-                    // Update the point with user's location
-                    select(lat, lon, true);
-                },
-                (error) => {
-                    console.error("Error getting location:", error);
-                    // Fallback to default coordinates if location access is denied
-                    useDefaultCoordinates();
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 30000,
-                    timeout: 27000
-                }
-            );
-            // Use default coordinates while waiting for geolocation
-            initialLatLon = [0, 0];
-        } else {
-            initialLatLon = [normalizeCoordinate(point.lat), normalizeCoordinate(point.lon)];
-        }
-
-        map = L.map(mapEl, { zoomControl: false }).setView(initialLatLon, defaultZoomLevel);
-
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        }).addTo(map);
-
-        // reassign the default marker images with the loaded ones
-        L.Icon.Default.prototype.options.iconUrl = markerIconUrl;
-        L.Icon.Default.prototype.options.iconRetinaUrl = markerIconRetinaUrl;
-        L.Icon.Default.prototype.options.shadowUrl = markerShadowUrl;
-        L.Icon.Default.imagePath = "";
-
-        // Create the marker at the initial position
-        marker = L.marker(initialLatLon, {
-            draggable: true,
-            autoPan: true,
-        }).addTo(map);
-
-        // Handle marker drag end
-        marker.on("moveend", (e) => {
-            if (e.sourceTarget?._latlng) {
-                select(e.sourceTarget._latlng.lat, e.sourceTarget._latlng.lng, false);
-            }
-        });
-
-        // Handle map click to move the marker
-        map.on("click", (e) => {
-            const { lat, lng } = e.latlng;
-            marker.setLatLng([lat, lng]);
-            select(lat, lng, false);
-        });
-
-        map.on("contextmenu", (e) => {
-            select(e.latlng.lat, e.latlng.lng, false);
-        });
-
-        // Add zoom controls
-        L.control.zoom({
-            position: 'topright'
-        }).addTo(map);
-
-        // Start watching user's location
-        if (navigator.geolocation) {
-            watchId = navigator.geolocation.watchPosition(
-                (position) => {
-                    const { latitude: lat, longitude: lon } = position.coords;
-                    userLocation = { lat, lon };
-                    updateUserLocationMarker(lat, lon);
-                },
-                (error) => {
-                    console.error("Error watching location:", error);
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 30000,
-                    timeout: 27000
-                }
-            );
-        }
-        centerOnUser();
-    }
-
-    function destroyMap() {
-        if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-            watchId = null;
-        }
-        resetSearch();
-        marker?.remove();
-        userLocationMarker?.remove();
-        map?.remove();
     }
 
     function resetSearch() {
@@ -258,20 +125,86 @@
         resetSearch();
     }
 
-    // Helper function to handle default coordinates
-    function useDefaultCoordinates() {
-        const defaultLatLon = [0, 0];
-        map?.setView(defaultLatLon, defaultZoomLevel);
-        marker?.setLatLng(defaultLatLon);
-    }
-
     onMount(() => {
-        initMap();
-        return () => destroyMap();
+        // Check if we're at default coordinates (0,0)
+        const isDefaultLocation = point.lat === 0 && point.lon === 0;
+        let initialLatLon;
+
+        if (isDefaultLocation && navigator.geolocation) {
+            // Try to get user's current position
+            navigator.geolocation.getCurrentPosition(
+                pos => select(pos.coords.latitude, pos.coords.longitude, true),
+                error => {}
+            );
+            // Use default coordinates while waiting for geolocation
+            initialLatLon = [0, 0];
+        } else {
+            initialLatLon = [normalizeCoordinate(point.lat), normalizeCoordinate(point.lon)];
+        }
+
+        map = L.map(mapEl, { zoomControl: false }).setView(initialLatLon, defaultZoomLevel);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }).addTo(map);
+
+        // reassign the default marker images with the loaded ones
+        L.Icon.Default.prototype.options.iconUrl = markerIconUrl;
+        L.Icon.Default.prototype.options.iconRetinaUrl = markerIconRetinaUrl;
+        L.Icon.Default.prototype.options.shadowUrl = markerShadowUrl;
+        L.Icon.Default.imagePath = "";
+
+        // Create the marker at the initial position
+        marker = L.marker(initialLatLon, {
+            draggable: true,
+            autoPan: true,
+        }).addTo(map);
+
+        // Handle marker drag end
+        marker.on("moveend", e => {
+            if (e.sourceTarget?._latlng) 
+                select(e.sourceTarget._latlng.lat, e.sourceTarget._latlng.lng, false);
+        });
+
+        // Handle map click to move the marker
+        map.on("click", (e) => {
+            const { lat, lng } = e.latlng;
+            marker.setLatLng([lat, lng]);
+            select(lat, lng, false);
+        });
+
+        map.on("contextmenu", e => select(e.latlng.lat, e.latlng.lng, false));
+
+        // Add zoom controls
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        // Start watching user's location
+        if (navigator.geolocation) {
+            watchId = navigator.geolocation.watchPosition(
+                position => {
+                    const { latitude: lat, longitude: lon } = position.coords;
+                    userLocation = { lat, lon };
+                    updateUserLocationMarker(lat, lon);
+                },
+                error => alert(error)
+            );
+        }
+
+        //destroy map
+        return () => { 
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            resetSearch();
+            marker?.remove();
+            userLocationMarker?.remove();
+            map?.remove();
+        };
     });
 </script>
 
-<div class="map-wrapper" style="height: {height}px">
+<div class="map-wrapper" style="height: 255px">
     <div class="map-search">
         <div class="form-field m-0">
             {#if isSearching}
@@ -317,7 +250,24 @@
         <button 
             type="button" 
             class="locate-btn"
-            on:click={centerOnUser}
+            on:click={() => {
+                if (userLocation) {
+                    const { lat, lon } = userLocation;
+                    map?.setView([lat, lon], defaultZoomLevel);
+                } 
+                else if (navigator.geolocation) 
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            const { latitude: lat, longitude: lon } = position.coords;
+                            userLocation = { lat, lon };
+                            updateUserLocationMarker(lat, lon);
+                            map?.setView([lat, lon], defaultZoomLevel);
+                        },
+                        error => alert(error)
+                    );
+                else 
+                    alert("Geolocation is not supported by your browser");
+            }}
             title="Center on my location"
         >
         <img src="/center.png" alt="Center on my location" />

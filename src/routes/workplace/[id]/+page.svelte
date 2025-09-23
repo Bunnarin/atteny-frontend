@@ -11,14 +11,6 @@
 
     // state
     let saving = false;
-
-    // if the current user doesnt have refresh_token, prompt them for it.
-    if (!get(pbUser)?.google_refresh_token) {
-        if (!confirm('Please Login again to access this page. This is a one-time setup.')) 
-            goto('/');
-        else
-            login(true);
-    }
         
     // Initialize workplace_fixture with data or defaults
     const workplace_fixture = {
@@ -38,6 +30,11 @@
     onMount(async () => await import('@googleworkspace/drive-picker-element'));
 
     async function upsert() {
+        // if the current user doesnt have refresh_token, prompt them for it.
+        if (!get(pbUser)?.refresh_token) {
+            alert('Please Login again to access this page. This is a one-time setup.');
+            await login(true).catch(error => alert(error));
+        }
         saving=true;
 
         workplace_fixture.file_id = selectedFile ? selectedFile.id : '';
@@ -72,9 +69,10 @@
 </div>
 
 <div class="form-question">
-    <label class="question-title" for="file_id">Link Spreadsheet (If not, we will create one for you):</label>
-    <button class="btn-secondary" on:click={() => {showPicker=true; document.querySelector('drive-picker').visible=true;}}>
-        {#if selectedFile} Selected {:else} Select {/if}
+    Link Spreadsheet (If not, we will create one for you):
+    <br>
+    <button class={selectedFile ? "btn-secondary" : "btn-primary"} on:click={() => {showPicker=true; document.querySelector('drive-picker').visible=true;}}>
+        {selectedFile ? "Selected" : "Select"}
     </button>
 </div>
 

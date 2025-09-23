@@ -3,51 +3,19 @@
     import { onMount } from 'svelte';
     import { writable, get } from 'svelte/store';
     import { pb, pbUser } from '$lib/pocketbase';
-
-    // Store for clock-in statuses
-    const clockInStatuses = writable({});
-
     export let data;
 
-    let locationError = '';
-    let successMessage = '';
-    let selectedWorkplaceId = '';
-    let modalWorkplaceId = '';
-    let clockingIn = false;
-
     const [today, _] = new Date().toISOString().split('T');
+
     // for the modal
     let date = today;
     let reason = '';
-    let submitting = false;
 
-    // Load clock-in statuses from localStorage
-    function loadClockInStatuses() {
-        if (typeof window === 'undefined') return;
-        const statuses = {};
-        const keys = Object.keys(localStorage);
-        keys.forEach(key => {
-            if (key.startsWith('clockin_')) 
-                statuses[key] = localStorage.getItem(key) === 'true';
-        });
-        clockInStatuses.set(statuses);
-    }
+    // Store for clock-in statuses
+    const clockInStatuses = writable({});
+    let modalWorkplaceId = '';
 
-    // Clean up old localStorage entries (older than 30 days)
-    function cleanupOldClockIns() {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        Object.keys(localStorage).forEach(key => {
-            if (!key.startsWith('clockin_')) return;
-            const [_, __, dateStr] = key.split('_');
-            const entryDate = new Date(dateStr);
-            if (entryDate < thirtyDaysAgo)
-                localStorage.removeItem(key);
-        });
-        // Reload statuses after cleanup
-        loadClockInStatuses();
-    }
+    const deg2rad = deg => deg * (Math.PI / 180);
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371000; // Radius of the earth in m
@@ -62,18 +30,12 @@
         return d;
     }
 
-    function deg2rad(deg) {
-        return deg * (Math.PI / 180);
-    }
-
     function hasClockedInToday(workplaceId, windowIndex, statuses) {
-        // if (typeof window === 'undefined') return false;
         const key = `clockin_${workplaceId}_${today}_${windowIndex}`;
         return statuses[key] === true;
     }
 
     function recordClockIn(workplaceId, windowIndex) {
-        if (typeof window === 'undefined') return;
         const key = `clockin_${workplaceId}_${today}_${windowIndex}`;
         localStorage.setItem(key, 'true');
         clockInStatuses.update(statuses => {
@@ -83,9 +45,8 @@
     }
 
     function isWithinTimeWindow(workplaceId, rules, statuses) {
-        if (!rules || rules.length === 0) {
+        if (!rules || rules.length === 0) 
             return { allowed: true, windowIndex: -1 }; // 24/7 access if no rules
-        }
 
         const now = new Date();
         const currentTime = now.getHours() * 60 + now.getMinutes(); // minutes since midnight
@@ -99,13 +60,10 @@
             const endMinutes = endTime[0] * 60 + endTime[1];
 
             let isInWindow = false;
-            if (startMinutes <= endMinutes) {
-                // Same day window
+            if (startMinutes <= endMinutes) // Same day window
                 isInWindow = currentTime >= startMinutes && currentTime <= endMinutes;
-            } else {
-                // Overnight window (e.g., 22:00 to 06:00)
+            else // Overnight window (e.g., 22:00 to 06:00)
                 isInWindow = currentTime >= startMinutes || currentTime <= endMinutes;
-            }
 
             if (isInWindow) {
                 // Check if already clocked in for this window today
@@ -118,58 +76,47 @@
         return { allowed: false, windowIndex: -1, reason: 'outside_window' };
     }
 
-    function clockIn(workplace) {
-        // Check time restrictions first
-        const timeCheck = isWithinTimeWindow(workplace.id, workplace.rules, get(clockInStatuses));
-        if (!timeCheck.allowed) {
-            if (timeCheck.reason === 'already_clocked_in') 
-                alert('You have already clocked in for this time window today.');
-            else 
-                alert('Clock-in is not allowed at this time. Please check your workplace time rules.');
-            return;
-        }
-
-        clockingIn = true;
-        locationError = '';
-        successMessage = '';
-
+    function clockIn(e, workplace) {
+        e.target.textContent = 'clocking in...';
         navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const userLat = position.coords.latitude;
-                const userLng = position.coords.longitude;
-                const workLat = workplace.location.lat;
-                const workLng = workplace.location.lon;
-                const distance = calculateDistance(userLat, userLng, workLat, workLng);
-                
+            pos => {
+                const distance = calculateDistance(pos.coords.latitude, pos.coords.longitude, workplace.location.lat, workplace.location.lon);
                 if (distance > workplace.proximity) {
-                    locationError = `You are ${distance.toFixed(2)} m away from ${workplace.name}. You must be within ${workplace.proximity} m to clock in.`;
-                } else {
+                    e.target.textContent = 'clock in';
+                    alert(`You are ${distance.toFixed(2)} m away from ${workplace.name}. You must be within ${workplace.proximity} m to clock in.`);
+                }
+                else
                     pb.send(`/clockin/${workplace.id}`, {method: 'POST', body: {timezone: Intl.DateTimeFormat().resolvedOptions().timeZone}})
                     .then(() => {
-                        successMessage = `Successfully clocked in!`;
-                        // Record the clock-in for this time window
-                        if (timeCheck.windowIndex >= 0) 
-                            recordClockIn(workplace.id, timeCheck.windowIndex);
+                        e.target.textContent = '✅';
+                        setTimeout(() => e.target.textContent = 'clock in', 10000);
+                        const timeCheck = isWithinTimeWindow(workplace.id, workplace.rules, get(clockInStatuses));
+                        recordClockIn(workplace.id, timeCheck.windowIndex);
                     })
-                    .catch(error => locationError = error);
-                }
+                    .catch(error => {alert(error); e.target.textContent = 'clock in';});
             },
-            (error) => {
-                alert("Unable to get your location. Make sure that your browser and our site has loication permission");
+            error => {
+                alert("Unable to get your location. Make sure that your browser and our site has location permission");
+                e.target.textContent = 'clock in';
             }
         );
     }
 
-    function copy_link(workplace) {
-        navigator.clipboard.writeText(`${window.location.origin}/subscribe/${workplace.id}`);
-        // change the button to copied
-        selectedWorkplaceId = workplace.id;
-    }
-
-    // Clean up old localStorage entries on component mount
+    // clean up & load clockin status
     onMount(() => {
-        cleanupOldClockIns();
-        loadClockInStatuses();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const statuses = {};
+        Object.keys(localStorage).forEach(key => {
+            if (!key.startsWith('clockin_')) return;
+            const [_, __, dateStr] = key.split('_');
+            const entryDate = new Date(dateStr);
+            if (entryDate < thirtyDaysAgo)
+                localStorage.removeItem(key);
+            else
+                statuses[key] = localStorage.getItem(key) === 'true';
+        });
+        clockInStatuses.set(statuses);
     });
 </script>
 
@@ -185,8 +132,11 @@
     <div class="form-section">
         <h2>{workplace.name}</h2>
         <button class="btn-primary" on:click={() => goto(`/workplace/${workplace.id}`)}>Edit</button>
-        <button class="btn-primary" on:click={() => copy_link(workplace)}>
-            {selectedWorkplaceId === workplace.id ? 'Copied!' : 'Invite Link'}
+        <button class="btn-primary" on:click={e => {
+            navigator.clipboard.writeText(`${window.location.origin}/subscribe/${workplace.id}`);
+            e.target.textContent = 'Copied!';
+        }}>
+            Invite Link
         </button>
         <button class="btn-primary" on:click={() => goto(`/request/${workplace.id}`)} 
             disabled={!data.requests.filter(r => r.workplace === workplace.id).length}>
@@ -198,26 +148,14 @@
 
 {#if data.workplaces_as_employee.length}
     <h1 class="form-title">Workplaces (as employee)</h1>
-    {#if locationError}
-        <div class="error">{locationError}</div>
-    {/if}
-
-    {#if successMessage}
-        <div class="success">{successMessage}</div>
-    {/if}
-
     {#each data.workplaces_as_employee as workplace}
         <div class="form-section">
             <h2>{workplace.name}</h2>
             <button
                 class="btn-primary"
-                on:click={() => clockIn(workplace)}
+                on:click={e => clockIn(e, workplace)}
                 disabled={!isWithinTimeWindow(workplace.id, workplace.rules, $clockInStatuses).allowed}>
-                {#if clockingIn && !locationError && !successMessage}
-                    Clocking In...
-                {:else}
-                    Clock In
-                {/if}
+                clock in
             </button>
             <button class="btn-primary" on:click={() => modalWorkplaceId = workplace.id}>Request Leave</button>
         </div>
@@ -232,21 +170,20 @@
             <br><br>
             Reason: <input bind:value={reason} required maxlength="255"/>
         </div>
-        <button class="btn-primary" disabled={submitting} on:click={() => {
-            submitting = true;
+        <button class="btn-primary" on:click={e => {
+            e.target.disabled = true;
+            e.target.textContent = 'Submitting...';
             pb.collection('request').create({
                 workplace: modalWorkplaceId,
                 createdBy: get(pbUser)?.id,
                 date,
                 reason,
             })
-            .then(() => {modalWorkplaceId = ''; reason=""; date="";})
-            .catch(() => alert('you have already requested leave for this date'))
-            .then(() => submitting = false);
+            .then(() => {modalWorkplaceId = ""; reason=""; date="";})
+            .catch(() => {alert('you have already requested leave for this date'); e.target.disabled = false; e.target.textContent = 'Submit';})
         }}>
-            {#if submitting}Submitting...{:else}Submit{/if}
+            Submit
         </button>
-        <!-- make it says submitting when clicked -->
         <button class="btn-secondary" on:click={() => modalWorkplaceId = ''}>Cancel</button>
     </div>
 </div>

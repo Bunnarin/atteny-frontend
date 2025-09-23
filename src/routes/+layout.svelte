@@ -6,7 +6,6 @@
 	import { pbUser, login, logout } from '$lib/pocketbase';
 	import { onMount } from 'svelte';
 
-	let loggin_in = false;
 	let deferredPrompt;
     let installAvailable = false;
     
@@ -41,13 +40,15 @@
 			<button class="btn-secondary" on:click={logout}>Logout</button>
 		</div>
 	{:else}
-		<button class="btn-primary" disabled={loggin_in}
-			on:click={async () => {
-				loggin_in=true;
-				await login(false);
+		<button class="btn-primary"
+			on:click={async e => {
+				e.target.disabled = true;
+				e.target.textContent = 'Logging in...';
+				await login(false)
+					.catch(() => alert("This device can only hold one account. This is to prevent cheating."));
 				window.location.reload();
 				}}>
-			{#if loggin_in}Logging in...{:else}Login{/if}
+			login
 		</button>
 	{/if}
 </div>
