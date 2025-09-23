@@ -123,10 +123,14 @@
         <input type="time" bind:value={rule.s} class="compact-time-input"/>
         to  
         <input type="time" bind:value={rule.e} class="compact-time-input"/>
-        <button class="btn-primary" type="button" on:click={() => workplace_fixture.rules = workplace_fixture.rules.filter((_, i) => i !== index) }>x</button>
+        <input type="text" bind:value={rule.n} class="compact-time-input" maxlength="255" placeholder="Optional Name"/>
+        <button class="btn-primary" type="button" 
+            on:click={() => workplace_fixture.rules = workplace_fixture.rules.filter((_, i) => i !== index) }>
+            x
+        </button>
         <br>
     {/each}
-    <button class="btn-secondary" type="button" on:click={() => workplace_fixture.rules = [...workplace_fixture.rules, {s: '01:00', e: '23:59'}]}>Add Time Window</button>
+    <button class="btn-secondary" type="button" on:click={() => workplace_fixture.rules = [...workplace_fixture.rules, {s: '01:00', e: '23:59', n: ''}]}>Add Time Window</button>
 </div>
 
 <div class="form-actions">
