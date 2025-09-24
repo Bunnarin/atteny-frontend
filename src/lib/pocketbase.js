@@ -1,8 +1,7 @@
-import { goto } from '$app/navigation';
+import { goto, invalidateAll } from '$app/navigation';
 import { PUBLIC_PB_URL } from '$env/static/public';
 import Pocketbase from 'pocketbase';
 import { get, writable } from 'svelte/store';
-import { invalidateAll } from '$app/navigation';
 
 export const pb = new Pocketbase(PUBLIC_PB_URL);
 export const pbUser = writable(pb.authStore.record);

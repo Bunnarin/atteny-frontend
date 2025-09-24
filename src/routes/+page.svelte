@@ -3,17 +3,18 @@
     import { onMount } from 'svelte';
     import { writable, get } from 'svelte/store';
     import { pb, pbUser } from '$lib/pocketbase';
+    import { workplaceStore } from '$lib/stores/workplace';
     export let data;
 
     const [today, _] = new Date().toISOString().split('T');
 
-    // for the modal
+    // for the request modal
+    let modalRequestId = '';
     let date = today;
     let reason = '';
 
     // Store for clock-in statuses
     const clockInStatuses = writable({});
-    let modalWorkplaceId = '';
 
     const deg2rad = deg => deg * (Math.PI / 180);
 
@@ -26,8 +27,7 @@
             Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const d = R * c; // Distance in m
-        return d;
+        return R * c; // Distance in m
     }
 
     function hasClockedInToday(workplaceId, windowIndex, statuses) {
@@ -104,14 +104,14 @@
 
     // clean up & load clockin status
     onMount(() => {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
         const statuses = {};
         Object.keys(localStorage).forEach(key => {
             if (!key.startsWith('clockin_')) return;
             const [_, __, dateStr] = key.split('_');
             const entryDate = new Date(dateStr);
-            if (entryDate < thirtyDaysAgo)
+            if (entryDate < yesterday)
                 localStorage.removeItem(key);
             else
                 statuses[key] = localStorage.getItem(key) === 'true';
@@ -133,15 +133,16 @@
         <h2>{workplace.name}</h2>
         <button class="btn-primary" on:click={() => goto(`/workplace/${workplace.id}`)}>Edit</button>
         <button class="btn-primary" on:click={e => {
-            navigator.clipboard.writeText(`${window.location.origin}/subscribe/${workplace.id}`);
-            e.target.textContent = 'Copied!';
+            navigator.clipboard.writeText(window.location.origin + '/subscribe/' + workplace.id);
+            e.target.textContent = "copied";
         }}>
-            Invite Link
+            copy link
         </button>
-        <button class="btn-primary" on:click={() => goto(`/request/${workplace.id}`)} 
-            disabled={!data.requests.filter(r => r.workplace === workplace.id).length}>
-            pending requests
-        </button>
+        {#if data.requests.filter(r => r.workplace === workplace.id).length}
+            <button class="btn-primary" on:click={() => goto(`/request/${workplace.id}`)}>
+                pending requests
+            </button>
+        {/if}
     </div>
 {/each}
 {/if}
@@ -157,12 +158,12 @@
                 disabled={!isWithinTimeWindow(workplace.id, workplace.rules, $clockInStatuses).allowed}>
                 clock in
             </button>
-            <button class="btn-primary" on:click={() => modalWorkplaceId = workplace.id}>Request Leave</button>
+            <button class="btn-primary" on:click={() => modalRequestId = workplace.id}>Request Leave</button>
         </div>
     {/each}
 {/if}
 
-{#if modalWorkplaceId}
+{#if modalRequestId}
 <div class="modal-overlay">
     <div class="modal-content">
         <div class="form-question">
@@ -174,17 +175,17 @@
             e.target.disabled = true;
             e.target.textContent = 'Submitting...';
             pb.collection('request').create({
-                workplace: modalWorkplaceId,
+                workplace: modalRequestId,
                 createdBy: get(pbUser)?.id,
                 date,
                 reason,
             })
-            .then(() => {modalWorkplaceId = ""; reason=""; date="";})
+            .then(() => {modalRequestId = ""; reason=""; date="";})
             .catch(() => {alert('you have already requested leave for this date'); e.target.disabled = false; e.target.textContent = 'Submit';})
         }}>
             Submit
         </button>
-        <button class="btn-secondary" on:click={() => modalWorkplaceId = ''}>Cancel</button>
+        <button class="btn-secondary" on:click={() => modalRequestId = ''}>Cancel</button>
     </div>
 </div>
 {/if}

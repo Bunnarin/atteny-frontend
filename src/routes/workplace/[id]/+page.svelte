@@ -8,18 +8,15 @@
     import { onMount } from 'svelte';
 
     export let data;
-
-    // state
-    let saving = false;
         
     // Initialize workplace_fixture with data or defaults
     const workplace_fixture = {
-        name: data.workplace?.name || '',
+        name: data.workplace?.name || 'My Workplace',
         file_id: data.workplace?.file_id || '',
         location: data.workplace?.location || { lat: 0, lon: 0 },
-        rules: data.workplace?.rules ? JSON.parse(JSON.stringify(data.workplace.rules)) : [],
+        rules: data.workplace?.rules || [],
         employer: get(pbUser)?.id,
-        employees: data.workplace?.expand?.employees?.map(e => e.email) || [],
+        employees: data.workplace?.employees || [],
         proximity: data.workplace?.proximity || 10
     }
     let emails = workplace_fixture.employees;
@@ -35,7 +32,6 @@
             alert('Please Login again to access this page. This is a one-time setup.');
             await login(true).catch(error => alert(error));
         }
-        saving=true;
 
         workplace_fixture.file_id = selectedFile ? selectedFile.id : '';
         workplace_fixture.employees = emails;
@@ -57,8 +53,8 @@
     <button class="btn-primary" on:click={async () => {
         if (!confirm('delete?')) return;
         await pb.collection('workplace').delete(data.workplace.id)
-        .then(async () => await workplaceStore.refresh())
-        .catch(err => alert(err));
+            .then(async () => await workplaceStore.refresh())
+            .catch(err => alert(err));
         goto('/');
     }}>Delete</button>
 </div>
@@ -88,21 +84,25 @@
 {/if}
 
 <div class="form-question">
-    Remaining: {emails.length} of {data.free_spots}
+    {#if (emails.length - data.free_spots) <= 0}
+    Free Tier: {emails.length} of {data.free_spots}
+    {:else}
+    Paid Tier: ${(emails.length - data.free_spots) * data.rent_price}/month
+    {/if}
     <input
         bind:value={currentEmail}
-        placeholder={emails.length >= data.free_spots ? 'No more spots available' : 'Enter email and press space'}
-        readonly={emails.length >= data.free_spots}
-        on:input={(e) => {
+        placeholder={emails.length >= data.free_spots && !data.has_card ? 'You need a card to add more employees' : 'Enter email and press space'}
+        readonly={emails.length >= data.free_spots && !data.has_card}
+        on:input={e => {
             if (e.data !== " " || emails.includes(currentEmail.trim()) || !currentEmail.includes('@'))
                 return; // make sure that we listen to space, that the user is unique and valid
             emails = [...emails, currentEmail.trim()];
             currentEmail = '';
         }}
     />
-    {#each emails as email, index}
+    {#each emails as email}
     <span class="employee-item">
-        <button class="btn-primary" on:click={() => emails = emails.filter((_, i) => i !== index)}>x</button>
+        <button class="btn-primary" on:click={() => emails = emails.filter(e => e !== email)}>x</button>
         {email}
     </span>
 {/each}
@@ -134,7 +134,11 @@
 </div>
 
 <div class="form-actions">
-    <button class="btn-primary" disabled={saving} on:click={upsert}>
-        {#if saving}saving{:else}save{/if}
+    <button class="btn-primary" on:click={e => {
+        e.target.textContent = "saving";
+        e.target.disabled = true;
+        upsert().catch(error => alert(error));
+    }}>
+        save
     </button>
 </div>

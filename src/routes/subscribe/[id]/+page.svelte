@@ -11,6 +11,7 @@
             .catch(error => {alert(error.message); goto('/');});
 
     pb.send(`/subscribe/${$page.params.id}`, {method: 'POST'})
-        .then(() => workplaceStore.refresh().then(() => goto('/')))
-        .catch(error => {alert(error.message); goto('/');});    
+        .then(() => workplaceStore.refresh())
+        .then(() => goto('/'))
+        .catch(({response}) => {alert(response.message); goto('/');});    
 </script>
