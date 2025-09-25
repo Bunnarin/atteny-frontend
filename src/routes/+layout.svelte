@@ -8,13 +8,12 @@
     // Reactive values from pbUser store
     $: live_mode = $pbUser?.live_mode;
     $: has_card = $pbUser?.payway_token;
-    $: total_employees = 0;
     $: max_employees = $pbUser?.max_employees || 0;
+    $: total_employees = 0;
     
     if (pb.authStore.isValid) 
         pb.collection('total_employees').getOne($pbUser.id)
-            .then(({value}) => total_employees = value)
-            .catch(() => {});
+            .then(data => total_employees = data.total_employees)
     
     let pwaInstallComponent;
     let isMobile = false;
@@ -31,27 +30,25 @@
                 <pwa-install name="atteny" icon="/favicon.png" manifest-url="/manifest.json" bind:this={pwaInstallComponent}></pwa-install>
                 <button class="btn-secondary" on:click={() => pwaInstallComponent.showDialog(true)}>install</button>
             {/if}
+            
+            {#if $pbUser.refresh_token}
             <button 
                 class={live_mode ? 'btn-primary' : 'btn-secondary'} 
                 on:click={() => goto('/buy')}>
-                {live_mode ? 'Live mode on' : 'Live mode off'}
+                live
             </button>
             
             <button 
                 class={total_employees >= max_employees ? 'btn-primary' : 'btn-secondary'} 
                 on:click={() => goto('/buy')}>
-                {#if total_employees < max_employees}
-                    Free Tier: {total_employees}/{max_employees}
-                {:else if !has_card}
+                {#if !has_card}
                     Link Card
                 {:else}
-                    Subscribed: {total_employees}/{max_employees}
+                    {total_employees}/{max_employees}
                 {/if}
             </button>
-            
-            <button class="btn-secondary" on:click={logout}>
-                Logout
-            </button>
+            {/if}
+            <button class="btn-secondary" on:click={logout}>➜]</button>
         </div>
     {:else}
         <button 

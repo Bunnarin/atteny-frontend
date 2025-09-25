@@ -26,9 +26,10 @@
 
 {#each requests as request}
     <div class="form-question">
-        <strong>Date:</strong> {new Date(request.date).toLocaleDateString()}<br>
-        <strong>Reason:</strong> {request.reason}<br>
-        <strong>Created by:</strong> {request.expand?.createdBy?.name}<br>
+        Name: <strong>{request.expand?.createdBy?.name}</strong>
+        Because: <strong>{request.reason}</strong><br>
+        On: <strong>{new Date(request.date).toLocaleDateString().slice(0, 5)}</strong>
+        For: <strong>{request.duration} days</strong><br>
         <button class="btn-primary" on:click={() => approve(request.id)}>Approve</button>
         <button class="btn-secondary" on:click={() => reject(request.id)}>Reject</button>
     </div>

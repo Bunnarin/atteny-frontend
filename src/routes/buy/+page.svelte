@@ -58,22 +58,21 @@
 </div>
 
 <div class="form-question">
-    <div class="form-title">Live Mode</div>
-    ${data.live_mode_price}/month
+    <div class="form-title">Live Mode: ${data.live_mode_price}/month</div>
+    <p>Live mode allows you to see real-time clock-ins and clock-outs.</p>
+    <br>
     {#if data.has_card}
-    <button class={data.live_mode ? 'btn-secondary' : 'btn-primary'} 
-        on:click={async (e) => await pb.send(`/toggle-live-mode`, {method: 'POST'})
-            .then(() => {e.target.textContent = 'saved'; e.target.disabled = true;})
-            .catch(error => alert(error))
-        }>
-        {data.live_mode ? 'Disable' : 'Enable'}
-    </button>
+        <button class={data.live_mode ? 'btn-secondary' : 'btn-primary'} 
+            on:click={async (e) => {
+                await pb.send(`/toggle-live-mode`, {method: 'POST'})
+                    .then(() => {e.target.textContent = 'saved'; e.target.disabled = true;})
+                    .catch(error => alert(error))
+            }}>
+            {data.live_mode ? 'Disable' : 'Enable'}
+        </button>
     {:else}
-    <button 
-        class="btn-primary w-full" 
-        on:click={() => populateForm('link_card_form', `/link-card`)}
-    >
-        Link Card first
-    </button>
+        <button class="btn-primary w-full" on:click={() => populateForm('link_card_form', `/link-card`)}>
+            Link Card first
+        </button>
     {/if}
 </div>

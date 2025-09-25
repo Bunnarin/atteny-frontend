@@ -3,7 +3,6 @@
     import { onMount } from 'svelte';
     import { writable, get } from 'svelte/store';
     import { pb, pbUser } from '$lib/pocketbase';
-    import { workplaceStore } from '$lib/stores/workplace';
     export let data;
 
     const [today, _] = new Date().toISOString().split('T');
@@ -12,6 +11,7 @@
     let modalRequestId = '';
     let date = today;
     let reason = '';
+    let duration = 1;
 
     // Store for clock-in statuses
     const clockInStatuses = writable({});
@@ -132,7 +132,7 @@
     <div class="form-section">
         <h2>{workplace.name}</h2>
         <button class="btn-primary" on:click={() => goto(`/workplace/${workplace.id}`)}>Edit</button>
-        <button class="btn-primary" on:click={e => {
+        <button class="btn-secondary" on:click={e => {
             navigator.clipboard.writeText(window.location.origin + '/subscribe/' + workplace.id);
             e.target.textContent = "copied";
         }}>
@@ -158,7 +158,7 @@
                 disabled={!isWithinTimeWindow(workplace.id, workplace.rules, $clockInStatuses).allowed}>
                 clock in
             </button>
-            <button class="btn-primary" on:click={() => modalRequestId = workplace.id}>Request Leave</button>
+            <button class="btn-secondary" on:click={() => modalRequestId = workplace.id}>Request Leave</button>
         </div>
     {/each}
 {/if}
@@ -167,25 +167,26 @@
 <div class="modal-overlay">
     <div class="modal-content">
         <div class="form-question">
-            Date: <input type="date" bind:value={date} required min={new Date().toISOString().split('T')[0]} />
-            <br><br>
-            Reason: <input bind:value={reason} required maxlength="255"/>
+            <form on:submit={e => {
+                e.preventDefault();
+                const formValues = Object.fromEntries(new FormData(e.target));
+                pb.collection('request').create({
+                    workplace: modalRequestId,
+                    createdBy: get(pbUser)?.id,
+                    ...formValues
+                })
+                .catch(() => alert('you have already requested leave for this date'));
+                modalRequestId = "";
+            }}>
+                Date: <input name="date" type="date" required min={today} value={today} />
+                <br>
+                Reason: <input name="reason" required maxlength="255"/>
+                <br>
+                For how many days: <input name="duration" required type="number" min="1" value="1"/>
+                <button type="submit" class="btn-primary">Submit</button>
+                <button class="btn-secondary" on:click={() => modalRequestId = ''}>Cancel</button>
+            </form>
         </div>
-        <button class="btn-primary" on:click={e => {
-            e.target.disabled = true;
-            e.target.textContent = 'Submitting...';
-            pb.collection('request').create({
-                workplace: modalRequestId,
-                createdBy: get(pbUser)?.id,
-                date,
-                reason,
-            })
-            .then(() => {modalRequestId = ""; reason=""; date="";})
-            .catch(() => {alert('you have already requested leave for this date'); e.target.disabled = false; e.target.textContent = 'Submit';})
-        }}>
-            Submit
-        </button>
-        <button class="btn-secondary" on:click={() => modalRequestId = ''}>Cancel</button>
     </div>
 </div>
 {/if}
