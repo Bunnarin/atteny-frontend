@@ -56,3 +56,24 @@
         </button>
     </div>
 </div>
+
+<div class="form-question">
+    <div class="form-title">Live Mode</div>
+    ${data.live_mode_price}/month
+    {#if data.has_card}
+    <button class={data.live_mode ? 'btn-secondary' : 'btn-primary'} 
+        on:click={async (e) => await pb.send(`/toggle-live-mode`, {method: 'POST'})
+            .then(() => {e.target.textContent = 'saved'; e.target.disabled = true;})
+            .catch(error => alert(error))
+        }>
+        {data.live_mode ? 'Disable' : 'Enable'}
+    </button>
+    {:else}
+    <button 
+        class="btn-primary w-full" 
+        on:click={() => populateForm('link_card_form', `/link-card`)}
+    >
+        Link Card first
+    </button>
+    {/if}
+</div>

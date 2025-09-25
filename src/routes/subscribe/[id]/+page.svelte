@@ -13,5 +13,5 @@
     pb.send(`/subscribe/${$page.params.id}`, {method: 'POST'})
         .then(() => workplaceStore.refresh())
         .then(() => goto('/'))
-        .catch(({response}) => {alert(response.message); goto('/');});    
+        .catch(() => {alert('This workplace ran out of employees spot. Please contact your employer to upgrade his plan'); goto('/');});    
 </script>

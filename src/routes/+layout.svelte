@@ -1,13 +1,12 @@
 <script>
     import "../app.css";
-    import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
     import { pb, pbUser, login, logout } from '$lib/pocketbase';
-    
-    let pwaInstallPrompt = null;
-    let showInstallButton = false;
-    
+    import '@khmyznikov/pwa-install';
+    import { onMount } from "svelte";
+
     // Reactive values from pbUser store
+    $: live_mode = $pbUser?.live_mode;
     $: has_card = $pbUser?.payway_token;
     $: total_employees = 0;
     $: max_employees = $pbUser?.max_employees || 0;
@@ -16,30 +15,27 @@
         pb.collection('total_employees').getOne($pbUser.id)
             .then(({value}) => total_employees = value)
             .catch(() => {});
+    
+    let pwaInstallComponent;
+    let isMobile = false;
 
-    onMount(() => {
-        // Handle PWA installation prompt
-        const handleBeforeInstallPrompt = (e) => {
-            e.preventDefault();
-            pwaInstallPrompt = e;
-            showInstallButton = true;
-        };
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        // Cleanup
-        return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    });
+    // Check if mobile on mount and on window resize
+    onMount(() => isMobile = window.innerWidth <= 768 );
 </script>
 
 <div class="header">
     <a href="/"><img class="logo" src="/favicon.png" alt="Logo"/></a>
-    
     {#if $pbUser}
         <div class="user">
-            {#if showInstallButton}
-                <button class="btn-primary" on:click={() => pwaInstallPrompt?.prompt()}>
-                    Install App
-                </button>
+            {#if isMobile}
+                <pwa-install name="atteny" icon="/favicon.png" manifest-url="/manifest.json" bind:this={pwaInstallComponent}></pwa-install>
+                <button class="btn-secondary" on:click={() => pwaInstallComponent.showDialog(true)}>install</button>
             {/if}
+            <button 
+                class={live_mode ? 'btn-primary' : 'btn-secondary'} 
+                on:click={() => goto('/buy')}>
+                {live_mode ? 'Live mode on' : 'Live mode off'}
+            </button>
             
             <button 
                 class={total_employees >= max_employees ? 'btn-primary' : 'btn-secondary'} 

@@ -36,6 +36,7 @@
     "type": "module",
     "dependencies": {
         "@googleworkspace/drive-picker-element": "^0.6.2",
+        "@khmyznikov/pwa-install": "^0.5.8",
         "@sveltejs/adapter-static": "^3.0.9",
         "@tailwindcss/vite": "^4.1.13",
         "leaflet": "^1.9.4",

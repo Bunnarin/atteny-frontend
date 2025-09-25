@@ -7,10 +7,7 @@ export const ssr = false;
 
 export const load = async ({ params }) => {
     const { rent_price } = await pb.send('/pricings');
-    let total_employees = 0;
-    await pb.collection('total_employees').getOne(get(pbUser)?.id)
-        .then(({value}) => total_employees = value)
-        .catch(() => {});
+    const { total_employees } = await pb.collection('total_employees').getOne(get(pbUser)?.id)
     const workplaces = get(workplaceStore);
     let workplace = null;
     if (params.id != "new") 

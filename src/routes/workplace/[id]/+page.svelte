@@ -123,7 +123,7 @@
         <input type="time" bind:value={rule.s} class="compact-time-input"/>
         to  
         <input type="time" bind:value={rule.e} class="compact-time-input"/>
-        <input type="text" bind:value={rule.n} class="compact-time-input" maxlength="255" placeholder="Optional Name"/>
+        <input type="text" bind:value={rule.n} class="compact-time-input" maxlength="10" placeholder="Optional Name"/>
         <button class="btn-primary" type="button" 
             on:click={() => workplace_fixture.rules = workplace_fixture.rules.filter((_, i) => i !== index) }>
             x
