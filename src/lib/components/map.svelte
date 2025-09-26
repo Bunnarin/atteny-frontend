@@ -207,21 +207,6 @@
 <div class="map-wrapper" style="height: 255px">
     <div class="map-search">
         <div class="form-field m-0">
-            {#if isSearching}
-                <div class="form-field-addon">
-                    <span class="loader loader-xs"></span>
-                </div>
-            {:else if searchTerm.length}
-                <div class="form-field-addon">
-                    <button
-                        type="button"
-                        class="btn btn-circle btn-xs btn-transparent"
-                        on:click={resetSearch}
-                    >
-                        <i class="ri-close-line"></i>
-                    </button>
-                </div>
-            {/if}
             <input 
                 type="text" 
                 placeholder="Search address..." 
@@ -248,7 +233,6 @@
     <!-- Custom locate control button -->
     <div class="locate-control">
         <button 
-            type="button" 
             class="locate-btn"
             on:click={() => {
                 if (userLocation) {
