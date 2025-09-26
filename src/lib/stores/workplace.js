@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { pb } from "$lib/pocketbase";
+import { pb } from "$lib/stores/pocketbase";
 
 function createWorkplaceStore() {
     const { subscribe, set } = writable([]);

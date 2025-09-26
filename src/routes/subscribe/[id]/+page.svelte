@@ -1,6 +1,6 @@
 <script>
     import { goto } from '$app/navigation';
-    import { pb, pbUser, login } from '$lib/pocketbase';
+    import { pb, pbUser, login } from '$lib/stores/pocketbase';
     import { page } from '$app/stores';
     import { get } from 'svelte/store';
     import { workplaceStore } from '$lib/stores/workplace';

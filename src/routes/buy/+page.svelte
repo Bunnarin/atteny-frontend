@@ -1,5 +1,5 @@
 <script>
-    import { pb } from '$lib/pocketbase';
+    import { pb } from '$lib/stores/pocketbase.js';
     import { PUBLIC_PAYWAY_ENDPOINT } from '$env/static/public';
     export let data;
     let amount;
@@ -26,23 +26,22 @@
         <h2 class="form-title">One-Time Purchase</h2>
         <input 
             type="number" 
+            class="compact-input"
             bind:value={amount} 
-            placeholder="Number of employees"
+            placeholder="how many"
             required 
         />
-        <br><br>
         <button 
-            class="btn-primary w-full" 
+            class="btn-primary" 
             disabled={amount < 1 || !Number.isInteger(amount)}
             on:click={() => populateForm('purchase_form', `/buy/${amount}`)}
         >
             ${((amount || 0) * data.license_price)}
         </button>
     </div>
-    <div class="text-center text-2xl py-4">OR</div>
     <div class="form-question flex-1">
         <h2 class="form-title">
-            Subscription:
+            or pay-as-you-go:
             {#if data.total_employees > data.max_employees}
                 ${(data.total_employees - data.max_employees) * data.rent_price}/month
             {/if}

@@ -1,11 +1,12 @@
 <script>
     import {PUBLIC_GOOGLE_CLIENT_ID, PUBLIC_GOOGLE_PROJECT_NUMBER} from '$env/static/public';
     import { goto } from '$app/navigation';
-    import { pb, pbUser, login } from '$lib/pocketbase';
+    import { pb, pbUser, login } from '$lib/stores/pocketbase.js';
     import { get } from 'svelte/store';
     import { workplaceStore } from '$lib/stores/workplace';
     import Map from '$lib/components/map.svelte';  
     import { onMount } from 'svelte';
+    import { totalEmployeeStore } from '$lib/stores/total_employees.js';
 
     export let data;
         
@@ -17,7 +18,7 @@
         rules: data.workplace?.rules || [],
         employer: get(pbUser)?.id,
         employees: data.workplace?.expand.employees || [],
-        proximity: data.workplace?.proximity || 10
+        proximity: data.workplace?.proximity || 50
     }
     let employees = workplace_fixture.employees;
     let currentEmail = '';
@@ -49,6 +50,7 @@
         })
         
         await workplaceStore.refresh();
+        await totalEmployeeStore.refresh();
         goto('/');
     }
 </script>
@@ -94,10 +96,13 @@
     {:else}
     Paid Tier: ${(employees.length - data.free_spots) * data.rent_price}/month
     {/if}
+    {#if !data.has_card && employees.length >= data.free_spots}
+        <button class="btn-primary" on:click={() => goto('/buy')}>link card</button>
+    {/if}
     <input
         bind:value={currentEmail}
-        placeholder={employees.length >= data.free_spots && !data.has_card ? 'You need a card to add more employees' : 'Enter email and press space'}
-        readonly={employees.length >= data.free_spots && !data.has_card}
+        placeholder={!data.has_card && employees.length >= data.free_spots ? 'You need a card to add more employees' : 'Enter email and press space'}
+        readonly={!data.has_card && employees.length >= data.free_spots}
         on:input={e => {
             if (e.data !== " " || !currentEmail.includes('@'))
                 return; // make sure that we listen to space, that the user is unique and valid
@@ -124,12 +129,12 @@
 
 <div class="form-section">
     <h2>Clock-in Time Rules</h2>
-    <p>Define time windows when employees can clock in. Leave empty for 24/7 access.</p>
+    <p>Define time windows when employees can clock in. They can clockin only once per time window.</p>
     {#each workplace_fixture.rules as rule, index}
-        <input type="time" bind:value={rule.s} class="compact-time-input"/>
-        to  
-        <input type="time" bind:value={rule.e} class="compact-time-input"/>
-        <input type="text" bind:value={rule.n} class="compact-time-input" maxlength="10" placeholder="Optional Name"/>
+        <input type="time" bind:value={rule.s} class="compact-input"/>
+        -  
+        <input type="time" bind:value={rule.e} class="compact-input"/>
+        <input type="text" bind:value={rule.n} class="compact-input" maxlength="10" placeholder="Optional Name"/>
         <button class="btn-primary" type="button" 
             on:click={() => workplace_fixture.rules = workplace_fixture.rules.filter((_, i) => i !== index) }>
             x

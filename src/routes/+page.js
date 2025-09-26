@@ -1,5 +1,5 @@
 import { workplaceStore } from '$lib/stores/workplace';
-import { pbUser } from '$lib/pocketbase';
+import { pbUser } from '$lib/stores/pocketbase';
 import { get } from 'svelte/store';
 
 export async function load() {
@@ -8,7 +8,6 @@ export async function load() {
         workplaces_as_employee: [],
     };
 
-    // Wait for both stores to initialize
     await workplaceStore.ensureInitialized();
     
     const workplaces = get(workplaceStore);

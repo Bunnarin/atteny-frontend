@@ -9,6 +9,7 @@ export const pbUser = writable(pb.authStore.record);
 pb.authStore.onChange(() => pbUser.set(pb.authStore.record), true);
 
 export async function login(get_token = false) {
+	// do this to prevent safari from blocking this popup
 	const newWindow = window.open("");
 	await pb.collection('users').authWithOAuth2({
 		provider: 'google',

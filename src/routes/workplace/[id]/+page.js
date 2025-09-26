@@ -1,5 +1,6 @@
 import { workplaceStore } from '$lib/stores/workplace';
-import { pb, pbUser } from '$lib/pocketbase';
+import { totalEmployeeStore } from '$lib/stores/total_employees.js';
+import { pb, pbUser } from '$lib/stores/pocketbase';
 import { get } from 'svelte/store';
 
 export const prerender = false;
@@ -7,7 +8,6 @@ export const ssr = false;
 
 export const load = async ({ params }) => {
     const { rent_price } = await pb.send('/pricings');
-    const { total_employees } = await pb.collection('total_employees').getOne(get(pbUser)?.id)
     const workplaces = get(workplaceStore);
     let workplace = null;
     if (params.id != "new") 
@@ -17,6 +17,6 @@ export const load = async ({ params }) => {
         rent_price,
         has_card: get(pbUser)?.payway_token,
         workplace,
-        free_spots: get(pbUser).max_employees - total_employees + (workplace?.employees?.length || 0),
+        free_spots: get(pbUser).max_employees - get(totalEmployeeStore) + (workplace?.employees?.length || 0),
     }
 }

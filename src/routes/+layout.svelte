@@ -1,21 +1,17 @@
 <script>
     import "../app.css";
     import { goto } from '$app/navigation';
-    import { pb, pbUser, login, logout } from '$lib/pocketbase';
+    import { pbUser, login, logout } from '$lib/stores/pocketbase';
     import { onMount } from 'svelte';
-
+    import { totalEmployeeStore } from '$lib/stores/total_employees';
     // Reactive values from pbUser store
-    $: live_mode = $pbUser?.live_mode;
-    $: has_card = $pbUser?.payway_token;
-    $: max_employees = $pbUser?.max_employees || 0;
-    $: total_employees = 0;
-    
-    if (pb.authStore.isValid) 
-        pb.collection('total_employees').getOne($pbUser.id)
-            .then(data => total_employees = data.total_employees)
+    let live_mode = $pbUser?.live_mode;
+    let max_employees = $pbUser?.max_employees || 0;
     
     let installPrompt = null;
-    onMount(() => window.addEventListener('beforeinstallprompt', e => installPrompt = e));
+    onMount(() => {
+        window.addEventListener('beforeinstallprompt', e => installPrompt = e);
+    });
 </script>
 
 <div class="header">
@@ -32,9 +28,9 @@
                     live
                 </button>
                 
-                <button class={total_employees >= max_employees ? 'btn-primary' : 'btn-secondary'} 
+                <button class={$totalEmployeeStore >= max_employees ? 'btn-primary' : 'btn-secondary'} 
                     on:click={() => goto('/buy')}>
-                    {total_employees}/{max_employees}
+                    {$totalEmployeeStore}/{max_employees}
                 </button>
             {/if}
             <button class="btn-secondary" on:click={logout}>➜]</button>

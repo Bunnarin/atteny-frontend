@@ -2,7 +2,7 @@
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
     import { get, writable } from 'svelte/store';
-    import { pb, pbUser } from '$lib/pocketbase';
+    import { pb, pbUser } from '$lib/stores/pocketbase.js';
     export let data;
 
     const [today, _] = new Date().toLocaleDateString();

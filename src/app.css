@@ -194,10 +194,10 @@ html {
   background-color: #f9f9ff;
 }
 
-.compact-time-input {
+.compact-input {
     width: auto;
-    min-width: 80px;
-    max-width: 150px;
+    min-width: 60px;
+    max-width: 100px;
     margin-right: 8px;
     flex-shrink: 1;
     box-sizing: content-box;
