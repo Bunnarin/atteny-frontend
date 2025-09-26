@@ -45,7 +45,7 @@
         
         await pb.send('/set-nickname', {
             method: "POST",
-            body: JSON.stringify(employees),
+            body: { employees },
         })
         
         await workplaceStore.refresh();
