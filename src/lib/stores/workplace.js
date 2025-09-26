@@ -7,7 +7,9 @@ function createWorkplaceStore() {
     let initPromise = null;
     
     async function refresh() {
-        const workplaces = await pb.collection('workplace').getFullList();
+        const workplaces = await pb.collection('workplace').getFullList({
+            expand: 'employees'
+        });
         set(workplaces);
         initialized = true;
         return workplaces;

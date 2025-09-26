@@ -5,10 +5,7 @@
     import { pb, pbUser } from '$lib/pocketbase';
     export let data;
 
-    const [today, _] = new Date().toISOString().split('T');
-
-    // for the request modal
-    let modalRequestId = '';
+    const [today, _] = new Date().toLocaleDateString();
 
     // Store for clock-in statuses
     let clockInStore = writable({});
@@ -132,11 +129,6 @@
         }}>
             copy link
         </button>
-        {#if data.requests.filter(r => r.workplace === workplace.id).length}
-            <button class="btn-primary" on:click={() => goto(`/request/${workplace.id}`)}>
-                pending requests
-            </button>
-        {/if}
     </div>
 {/each}
 {/if}
@@ -149,37 +141,8 @@
             <button on:click={e => clockIn(e, workplace)} disabled={!canClockin(workplace, $clockInStore)} class="btn-primary">
                 clock in
             </button>
-            <button class="btn-secondary" on:click={() => modalRequestId = workplace.id}>Request Leave</button>
         </div>
     {/each}
-{/if}
-
-{#if modalRequestId}
-<div class="modal-overlay">
-    <div class="modal-content">
-        <div class="form-question">
-            <form on:submit={e => {
-                e.preventDefault();
-                const formValues = Object.fromEntries(new FormData(e.target));
-                pb.collection('request').create({
-                    workplace: modalRequestId,
-                    createdBy: get(pbUser)?.id,
-                    ...formValues
-                })
-                .catch(() => alert('you have already requested leave for this date'));
-                modalRequestId = "";
-            }}>
-                Date: <input name="date" type="date" required min={today} value={today} />
-                <br>
-                Reason: <input name="reason" required maxlength="255"/>
-                <br>
-                For how many days: <input name="duration" required type="number" min="1" value="1"/>
-                <button type="submit" class="btn-primary">Submit</button>
-                <button class="btn-secondary" on:click={() => modalRequestId = ''}>Cancel</button>
-            </form>
-        </div>
-    </div>
-</div>
 {/if}
 
 {#if !$pbUser}

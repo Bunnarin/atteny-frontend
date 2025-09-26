@@ -16,10 +16,10 @@
         location: data.workplace?.location || { lat: 0, lon: 0 },
         rules: data.workplace?.rules || [],
         employer: get(pbUser)?.id,
-        employees: data.workplace?.employees || [],
+        employees: data.workplace?.expand.employees || [],
         proximity: data.workplace?.proximity || 10
     }
-    let emails = workplace_fixture.employees;
+    let employees = workplace_fixture.employees;
     let currentEmail = '';
     let selectedFile = data.workplace?.file_id;
     let showPicker = false;
@@ -34,7 +34,7 @@
         }
 
         workplace_fixture.file_id = selectedFile ? selectedFile.id : '';
-        workplace_fixture.employees = emails;
+        workplace_fixture.employees = employees.map(e => e.email);
         
         if (data.workplace) 
             await pb.collection('workplace').update(data.workplace.id, workplace_fixture)
@@ -42,6 +42,11 @@
         else 
             await pb.collection('workplace').create(workplace_fixture)
                 .catch(err => alert(err));
+        
+        await pb.send('/set-nickname', {
+            method: "POST",
+            body: JSON.stringify(employees),
+        })
         
         await workplaceStore.refresh();
         goto('/');
@@ -84,28 +89,29 @@
 {/if}
 
 <div class="form-question">
-    {#if (emails.length - data.free_spots) <= 0}
-    Free Tier: {emails.length} of {data.free_spots}
+    {#if (employees.length - data.free_spots) <= 0}
+    Free Tier: {employees.length} of {data.free_spots}
     {:else}
-    Paid Tier: ${(emails.length - data.free_spots) * data.rent_price}/month
+    Paid Tier: ${(employees.length - data.free_spots) * data.rent_price}/month
     {/if}
     <input
         bind:value={currentEmail}
-        placeholder={emails.length >= data.free_spots && !data.has_card ? 'You need a card to add more employees' : 'Enter email and press space'}
-        readonly={emails.length >= data.free_spots && !data.has_card}
+        placeholder={employees.length >= data.free_spots && !data.has_card ? 'You need a card to add more employees' : 'Enter email and press space'}
+        readonly={employees.length >= data.free_spots && !data.has_card}
         on:input={e => {
-            if (e.data !== " " || emails.includes(currentEmail.trim()) || !currentEmail.includes('@'))
+            if (e.data !== " " || !currentEmail.includes('@'))
                 return; // make sure that we listen to space, that the user is unique and valid
-            emails = [...emails, currentEmail.trim()];
+            employees = [...employees, { nickname: '', email: currentEmail.trim() }];
             currentEmail = '';
         }}
     />
-    {#each emails as email}
+    {#each employees as employee}
     <span class="employee-item">
-        <button class="btn-primary" on:click={() => emails = emails.filter(e => e !== email)}>x</button>
-        {email}
+        <button class="btn-primary" on:click={() => employees = employees.filter(e => e !== employee)}>x</button>
+        {employee.email}
+        <input type="text" bind:value={employee.nickname} placeholder={employee.name || "optional nickname"}/>
     </span>
-{/each}
+    {/each}
 </div>
 
 <div class="form-question">
