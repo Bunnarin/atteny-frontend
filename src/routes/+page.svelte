@@ -1,7 +1,7 @@
 <script>
     import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
-    import { writable, get } from 'svelte/store';
+    import { get, writable } from 'svelte/store';
     import { pb, pbUser } from '$lib/pocketbase';
     export let data;
 
@@ -9,15 +9,12 @@
 
     // for the request modal
     let modalRequestId = '';
-    let date = today;
-    let reason = '';
-    let duration = 1;
 
     // Store for clock-in statuses
-    const clockInStatuses = writable({});
+    let clockInStore = writable({});
 
+    // helper to calculate distance
     const deg2rad = deg => deg * (Math.PI / 180);
-
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371000; // Radius of the earth in m
         const dLat = deg2rad(lat2 - lat1);
@@ -30,50 +27,52 @@
         return R * c; // Distance in m
     }
 
-    function hasClockedInToday(workplaceId, windowIndex, statuses) {
-        const key = `clockin_${workplaceId}_${today}_${windowIndex}`;
-        return statuses[key] === true;
+    // 2nd level helper
+    const convertToMinutes = (timeStr) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+    // 1st level helper
+    const isBetween = (timeStr, startStr, endStr) => {
+        const timeMn = convertToMinutes(timeStr);
+        const startMn = convertToMinutes(startStr);
+        const endMn = convertToMinutes(endStr);
+        if (endMn > startMn) //daytime
+            return timeMn > startMn && timeMn < endMn;
+        else //nighttime
+            return timeMn < startMn && timeMn > endMn;
     }
 
-    function recordClockIn(workplaceId, windowIndex) {
-        const key = `clockin_${workplaceId}_${today}_${windowIndex}`;
-        localStorage.setItem(key, 'true');
-        clockInStatuses.update(statuses => {
-            statuses[key] = true;
-            return statuses;
-        });
+    function canClockin(workplace) {
+        // first check if there's any time window in the workplace.rules that allow
+        if (!workplace.rules.length) 
+            return true; // 24/7 access if no rules
+        
+        const timeStr = new Date().toLocaleTimeString().slice(0, 5);
+        const matchingRule = workplace.rules.find(rule => isBetween(timeStr, rule.s, rule.e));
+        if (!matchingRule)
+            return false //not allowed clock in at this time
+    
+        // then check if there's already a clockin in that timewindow
+        const clockIns = get(clockInStore);
+        const mounted = clockIns[today]; //because error if not mounted
+        if (mounted)
+            for (const pastTimeStr of (clockIns[today][workplace.id] || []))
+                if (isBetween(pastTimeStr, matchingRule.s, matchingRule.e))
+                    return false // already clocked in for this timewindow
+        
+        // after passing all the check
+        return true;
     }
 
-    function isWithinTimeWindow(workplaceId, rules, statuses) {
-        if (!rules || rules.length === 0) 
-            return { allowed: true, windowIndex: -1 }; // 24/7 access if no rules
-
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes(); // minutes since midnight
-
-        for (let i = 0; i < rules.length; i++) {
-            const rule = rules[i];
-            // get key val from rule
-            const startTime = rule.s.split(':').map(Number);
-            const endTime = rule.e.split(':').map(Number);
-            const startMinutes = startTime[0] * 60 + startTime[1];
-            const endMinutes = endTime[0] * 60 + endTime[1];
-
-            let isInWindow = false;
-            if (startMinutes <= endMinutes) // Same day window
-                isInWindow = currentTime >= startMinutes && currentTime <= endMinutes;
-            else // Overnight window (e.g., 22:00 to 06:00)
-                isInWindow = currentTime >= startMinutes || currentTime <= endMinutes;
-
-            if (isInWindow) {
-                // Check if already clocked in for this window today
-                if (hasClockedInToday(workplaceId, i, statuses))
-                    return { allowed: false, windowIndex: i, reason: 'already_clocked_in' };
-                return { allowed: true, windowIndex: i };
-            }
-        }
-
-        return { allowed: false, windowIndex: -1, reason: 'outside_window' };
+    function recordClockIn(workplaceId) {
+        // update the reactive store and localstorage
+        const timeStr = new Date().toLocaleTimeString().slice(0, 5);
+        const clockIns = get(clockInStore);
+        clockIns[today][workplaceId] ??= [];
+        clockIns[today][workplaceId].push(timeStr);
+        clockInStore.set(clockIns);
+        localStorage.setItem('clockIns', JSON.stringify(clockIns));
     }
 
     function clockIn(e, workplace) {
@@ -90,8 +89,7 @@
                     .then(() => {
                         e.target.textContent = '✅';
                         setTimeout(() => e.target.textContent = 'clock in', 10000);
-                        const timeCheck = isWithinTimeWindow(workplace.id, workplace.rules, get(clockInStatuses));
-                        recordClockIn(workplace.id, timeCheck.windowIndex);
+                        recordClockIn(workplace.id);
                     })
                     .catch(error => {alert(error); e.target.textContent = 'clock in';});
             },
@@ -104,19 +102,15 @@
 
     // clean up & load clockin status
     onMount(() => {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const statuses = {};
-        Object.keys(localStorage).forEach(key => {
-            if (!key.startsWith('clockin_')) return;
-            const [_, __, dateStr] = key.split('_');
-            const entryDate = new Date(dateStr);
-            if (entryDate < yesterday)
-                localStorage.removeItem(key);
-            else
-                statuses[key] = localStorage.getItem(key) === 'true';
+        const clockIns = JSON.parse(localStorage.getItem('clockIns') || '{}');
+        clockIns[today] ??= {}; //init today's records
+        Object.keys(clockIns).forEach(date => {
+            if (date != today) 
+                delete clockIns[date];
         });
-        clockInStatuses.set(statuses);
+        // Save back the cleaned records
+        clockInStore.set(clockIns);
+        localStorage.setItem('clockIns', JSON.stringify(clockIns));
     });
 </script>
 
@@ -127,7 +121,7 @@
 {/if}
 
 {#if data.workplaces_as_employer.length}
-<h1 class="form-title">Workplaces (as employer)</h1>
+    <h1 class="form-title">Workplaces (as employer)</h1>
 {#each data.workplaces_as_employer as workplace}
     <div class="form-section">
         <h2>{workplace.name}</h2>
@@ -152,10 +146,7 @@
     {#each data.workplaces_as_employee as workplace}
         <div class="form-section">
             <h2>{workplace.name}</h2>
-            <button
-                class="btn-primary"
-                on:click={e => clockIn(e, workplace)}
-                disabled={!isWithinTimeWindow(workplace.id, workplace.rules, $clockInStatuses).allowed}>
+            <button on:click={e => clockIn(e, workplace)} disabled={!canClockin(workplace, $clockInStore)} class="btn-primary">
                 clock in
             </button>
             <button class="btn-secondary" on:click={() => modalRequestId = workplace.id}>Request Leave</button>
