@@ -77,30 +77,22 @@
         searchTimeoutId = setTimeout(async () => {
             searchAbortController = new AbortController();
 
-            try {
-                const response = await fetch(
-                    "https://nominatim.openstreetmap.org/search.php?format=jsonv2&q=" + encodeURIComponent(q),
-                    { signal: searchAbortController.signal },
-                );
-                if (response.status != 200) {
-                    throw new Error("OpenStreetMap API error " + response.status);
-                }
+            const response = await fetch(
+                "https://nominatim.openstreetmap.org/search.php?format=jsonv2&q=" + encodeURIComponent(q),
+                { signal: searchAbortController.signal },
+            );
+            if (response.status != 200) 
+                throw new Error("OpenStreetMap API error " + response.status);
 
-                const addresses = await response.json();
-                searchResults = []; // Clear previous results
-                
-                for (const item of addresses) {
-                    searchResults.push({
-                        lat: parseFloat(item.lat),
-                        lon: parseFloat(item.lon),
-                        name: item.display_name,
-                    });
-                }
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    console.warn("[address search failed]", err);
-                }
-            }
+            const addresses = await response.json();
+            searchResults = []; // Clear previous results
+            
+            for (const item of addresses) 
+                searchResults.push({
+                    lat: parseFloat(item.lat),
+                    lon: parseFloat(item.lon),
+                    name: item.display_name,
+                });
 
             isSearching = false;
         }, debounce);
@@ -125,7 +117,11 @@
         resetSearch();
     }
 
-    onMount(() => {
+    onMount(async () => {
+        const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
+        if (permissionStatus.state === "prompt")
+            alert(`We need your location to populate the map. Please click allow on the next prompt. We do not track your location 24/7. We only check it everytime you enter this page.`);
+
         // Check if we're at default coordinates (0,0)
         const isDefaultLocation = point.lat === 0 && point.lon === 0;
         let initialLatLon;
@@ -134,7 +130,7 @@
             // Try to get user's current position
             navigator.geolocation.getCurrentPosition(
                 pos => select(pos.coords.latitude, pos.coords.longitude, true),
-                error => {}
+                error => alert("Please make sure that you enable location on your device and that this browser has permission. If you didn't allow us to access your location the first time, please manually allow it on your browser.")
             );
             // Use default coordinates while waiting for geolocation
             initialLatLon = [0, 0];
@@ -247,7 +243,7 @@
                             updateUserLocationMarker(lat, lon);
                             map?.setView([lat, lon], defaultZoomLevel);
                         },
-                        error => alert(error)
+                        error => alert("Please make sure that you enable location on your device and that this browser has permission. If you didn't allow us to access your location the first time, please manually allow it on your browser.")
                     );
                 else 
                     alert("Geolocation is not supported by your browser");
@@ -307,31 +303,6 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
-    .form-field-addon {
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        padding-left: 12px;
-        pointer-events: none;
-    }
-
-    .btn-transparent {
-        background: transparent;
-        border: none;
-        padding: 4px;
-        cursor: pointer;
-        pointer-events: auto;
-        color: #64748b;
-    }
-
-    .btn-transparent:hover {
-        background: rgba(0, 0, 0, 0.05);
-        border-radius: 50%;
-    }
-
     .dropdown {
         position: absolute;
         width: 100%;
@@ -359,15 +330,6 @@
 
     .dropdown-item:hover {
         background-color: #f7fafc;
-    }
-
-    .loader-xs {
-        width: 16px;
-        height: 16px;
-        border: 2px solid #e2e8f0;
-        border-top-color: #3b82f6;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
     }
 
     /* Locate control */

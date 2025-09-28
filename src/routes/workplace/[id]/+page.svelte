@@ -5,9 +5,8 @@
     import { get } from 'svelte/store';
     import { workplaceStore } from '$lib/stores/workplace';
     import Map from '$lib/components/map.svelte';  
-    import { onMount } from 'svelte';
     import { totalEmployeeStore } from '$lib/stores/total_employees.js';
-
+    import '@googleworkspace/drive-picker-element';
     export let data;
         
     // Initialize workplace_fixture with data or defaults
@@ -24,8 +23,6 @@
     let currentEmail = '';
     let selectedFile = data.workplace?.file_id;
     let showPicker = false;
-
-    onMount(async () => await import('@googleworkspace/drive-picker-element'));
 
     async function upsert() {
         // if the current user doesnt have refresh_token, prompt them for it.

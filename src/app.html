@@ -8,38 +8,13 @@
 		%sveltekit.head%
   </head>
   <body>
+    <script>
+      if ('serviceWorker' in navigator) 
+        if (!navigator.serviceWorker.controller)
+          navigator.serviceWorker.register('./service-worker.js');
+    </script>
     <div style="display: contents">
       %sveltekit.body%
     </div>
-    <script>
-      // script to auto update the pwa when the service-worker version change
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js')
-            .then(registration => {
-              // Check for updates hourly
-              setInterval(() => registration.update(), 3600); 
-              
-              // Listen for the service worker's state changes
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // Notify user about the update
-                    if (confirm('A new version is available! Reload to update?')) {
-                      newWorker.postMessage({ type: 'SKIP_WAITING' });
-                      window.location.reload();
-                    }
-                  }
-                });
-              });
-            });
-        });
-        
-        // Listen for controller changes (when a new service worker takes over)
-        navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
-      }
-    </script>
   </body>
 </html>

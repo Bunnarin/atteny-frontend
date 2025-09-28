@@ -1,52 +1,73 @@
-const CACHE_NAME = 'atteny-cache-v1';
-const urlsToCache = ['/'];
+var cacheName = 'atteny_cache_v1';
 
-// Install event: Caching static assets
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-  );
+var filesToCache = [
+	'/',
+	'manifest.json',
+];
+
+self.addEventListener('install', function (e) {
+	console.log('[ServiceWorker] Install');
+
+	e.waitUntil(
+		caches.open(cacheName).then(function (cache) {
+			console.log('[ServiceWorker] Caching app shell');
+			return cache.addAll(filesToCache);
+		})
+	);
+
+	self.skipWaiting();
 });
 
-// Fetch event: Network-first, then cache fallback
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // If the response is good, clone it and store it in the cache
-        if (response.status === 200) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request).then((response) => response))
-  );
+self.addEventListener('activate', function (e) {
+	console.log('[ServiceWorker] Activate');
+	e.waitUntil(
+		caches.keys().then(function (keyList) {
+			return Promise.all(keyList.map(function (key) {
+				if (key !== cacheName) {
+					console.log('[ServiceWorker] Removing old cache', key);
+						sendMessageToAll('NEW_VERSION');
+					return caches.delete(key);
+				}
+			}));
+		})
+	);
+	return self.clients.claim();
 });
 
-// Activate event: Clean up old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          // Delete all caches that don't match the current CACHE_NAME
-          if (cacheName !== CACHE_NAME) 
-            return caches.delete(cacheName);
+self.addEventListener('fetch', function (e) {
+    e.respondWith(
+        caches.match(e.request, { ignoreSearch: true }).then(function (response) {
+            return response || fetch(e.request);
         })
-      ).then(() => self.clients.claim());
-    })
-  );
+    );
 });
 
-// Listen for messages from the page
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') 
-    self.skipWaiting();
+// --- events from/to js application ---
+function sendMessage(client, msg) {
+	return new Promise(function (resolve, reject) {
+		var msg_chan = new MessageChannel();
+
+		client.postMessage(msg, [msg_chan.port2]);
+	});
+}
+
+function sendMessageToAll(msg, callback) {
+	clients.matchAll().then(clients => {
+		clients.forEach(client => {
+			sendMessage(client, msg);
+		})
+		if (callback && typeof callback == 'function') {
+			callback();
+		}
+	})
+}
+
+// --- message from js application ---
+self.addEventListener('message', event => {
+	if (event && event.data) {
+		if (event.data.message) {
+			console.log('SW MESSAGE: ', event.data.message, event.data.data);
+		}
+	}
 });

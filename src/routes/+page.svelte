@@ -72,8 +72,13 @@
         localStorage.setItem('clockIns', JSON.stringify(clockIns));
     }
 
-    function clockIn(e, workplace) {
+    async function clockIn(e, workplace) {
         e.target.textContent = 'clocking in...';
+        // confirm them to make sure that they don't deny it the first time
+        const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
+        if (permissionStatus.state === "prompt")
+            alert(`We need your location to confirm that you are at this workplace. Please click allow on the next prompt. We do not track your location 24/7. We only check it everytime you clockin.`);
+        
         navigator.geolocation.getCurrentPosition(
             pos => {
                 const distance = calculateDistance(pos.coords.latitude, pos.coords.longitude, workplace.location.lat, workplace.location.lon);
@@ -91,7 +96,7 @@
                     .catch(error => {alert(error); e.target.textContent = 'clock in';});
             },
             error => {
-                alert("Unable to get your location. Make sure that your browser and our site has location permission");
+                alert("Please make sure that you enable location on your device and that this browser has permission. If you didn't allow us to access your location the first time, please manually allow it on your browser.");
                 e.target.textContent = 'clock in';
             }
         );

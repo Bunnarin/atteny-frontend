@@ -2,35 +2,29 @@
     import "../app.css";
     import { goto } from '$app/navigation';
     import { pbUser, login, logout } from '$lib/stores/pocketbase';
-    import { onMount } from 'svelte';
+    import '@khmyznikov/pwa-install';
     import { totalEmployeeStore } from '$lib/stores/total_employees';
-    // Reactive values from pbUser store
-    let live_mode = $pbUser?.live_mode;
-    let max_employees = $pbUser?.max_employees || 0;
     
-    let installPrompt = null;
-    onMount(() => {
-        window.addEventListener('beforeinstallprompt', e => installPrompt = e);
-    });
+    let installPrompt;
 </script>
 
 <div class="header">
     <a href="/"><img class="logo" src="/logo192.png" alt="Logo"/></a>
+    <pwa-install bind:this={installPrompt} manifest-url="/manifest.json"></pwa-install>  
+    <button on:click={installPrompt.install()}>Install</button>
+
     {#if $pbUser}
-        <div class="user">    
-            {#if installPrompt}
-                <button on:click={() => installPrompt.prompt()}>install</button>      
-            {/if}  
+        <div class="user">  
             {#if $pbUser.refresh_token}
                 <button 
-                    class={live_mode ? 'btn-primary' : 'btn-secondary'} 
+                    class={$pbUser?.live_mode ? 'btn-primary' : 'btn-secondary'} 
                     on:click={() => goto('/buy')}>
                     live
                 </button>
                 
-                <button class={$totalEmployeeStore >= max_employees ? 'btn-primary' : 'btn-secondary'} 
+                <button class={$totalEmployeeStore >= $pbUser?.max_employees ? 'btn-primary' : 'btn-secondary'} 
                     on:click={() => goto('/buy')}>
-                    {$totalEmployeeStore}/{max_employees}
+                    {$totalEmployeeStore}/{$pbUser?.max_employees}
                 </button>
             {/if}
             <button class="btn-secondary" on:click={logout}>➜]</button>
