@@ -23,9 +23,6 @@ function createWorkplaceStore() {
         return initPromise;
     }
 
-    // Start initialization
-    ensureInitialized();
-
     return {
         subscribe,
         refresh,

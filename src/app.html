@@ -3,15 +3,13 @@
   <head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/logo192.png" />
-		<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
+		<link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		%sveltekit.head%
   </head>
   <body>
     <script>
-      if ('serviceWorker' in navigator) 
-        if (!navigator.serviceWorker.controller)
-          navigator.serviceWorker.register('./service-worker.js');
+      window.addEventListener('beforeinstallprompt', e => window.deferredInstallPrompt = e);
     </script>
     <div style="display: contents">
       %sveltekit.body%

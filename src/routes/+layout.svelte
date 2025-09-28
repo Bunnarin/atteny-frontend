@@ -2,26 +2,23 @@
     import "../app.css";
     import { goto } from '$app/navigation';
     import { pbUser, login, logout } from '$lib/stores/pocketbase';
-    import '@khmyznikov/pwa-install';
     import { totalEmployeeStore } from '$lib/stores/total_employees';
-    
-    let installPrompt;
 </script>
 
 <div class="header">
     <a href="/"><img class="logo" src="/logo192.png" alt="Logo"/></a>
-    <pwa-install bind:this={installPrompt} manifest-url="/manifest.json"></pwa-install>  
-    <button on:click={installPrompt.install()}>Install</button>
 
     {#if $pbUser}
         <div class="user">  
+            {#if window.deferredInstallPrompt}
+                <button class="btn-secondary" onclick="window.deferredInstallPrompt.prompt()">Install</button>
+            {/if}
             {#if $pbUser.refresh_token}
                 <button 
                     class={$pbUser?.live_mode ? 'btn-primary' : 'btn-secondary'} 
                     on:click={() => goto('/buy')}>
-                    live
+                    live mode
                 </button>
-                
                 <button class={$totalEmployeeStore >= $pbUser?.max_employees ? 'btn-primary' : 'btn-secondary'} 
                     on:click={() => goto('/buy')}>
                     {$totalEmployeeStore}/{$pbUser?.max_employees}
