@@ -54,7 +54,14 @@
 
 {#if data.workplace}
 <div class="form-actions">
-    <button class="btn-primary" on:click={async () => {
+    <button class="btn-primary" on:click={e => {
+        e.target.textContent = "saving";
+        e.target.disabled = true;
+        upsert().catch(error => alert(error));
+    }}>
+        save
+    </button>
+    <button class="btn-secondary" on:click={async () => {
         if (!confirm('delete?')) return;
         await pb.collection('workplace').delete(data.workplace.id)
             .then(async () => await workplaceStore.refresh())

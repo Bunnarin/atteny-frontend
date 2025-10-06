@@ -245,7 +245,7 @@ html {
 .header .user {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 5px;
 }
 
 .header .user h2 {

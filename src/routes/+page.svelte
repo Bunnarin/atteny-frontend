@@ -124,18 +124,18 @@
 
 {#if data.workplaces_as_employer.length}
     <h1 class="form-title">Workplaces (as employer)</h1>
-{#each data.workplaces_as_employer as workplace}
-    <div class="form-section">
-        <h2>{workplace.name}</h2>
-        <button class="btn-primary" on:click={() => goto(`/workplace/${workplace.id}`)}>Edit</button>
-        <button class="btn-secondary" on:click={e => {
-            navigator.clipboard.writeText(window.location.origin + '/subscribe/' + workplace.id);
-            e.target.textContent = "copied";
-        }}>
-            copy link
-        </button>
-    </div>
-{/each}
+    {#each data.workplaces_as_employer as workplace}
+        <div class="form-section">
+            <h2>{workplace.name}</h2>
+            <button class="btn-primary" on:click={() => goto(`/workplace/${workplace.id}`)}>Edit</button>
+            <button class="btn-secondary" on:click={e => {
+                navigator.clipboard.writeText(window.location.origin + '/subscribe/' + workplace.id);
+                e.target.textContent = "copied";
+            }}>
+                copy link
+            </button>
+        </div>
+    {/each}
 {/if}
 
 {#if data.workplaces_as_employee.length}
@@ -143,7 +143,10 @@
     {#each data.workplaces_as_employee as workplace}
         <div class="form-section">
             <h2>{workplace.name}</h2>
-            <button on:click={e => clockIn(e, workplace)} disabled={!canClockin(workplace, $clockInStore)} class="btn-primary">
+            <button on:click={e => clockIn(e, workplace)} 
+                disabled={!canClockin(workplace, $clockInStore)} 
+                title={!canClockin(workplace, $clockInStore) ? "your employer doesn't want you to clock in at this time" : ""}
+                class="btn-primary">
                 clock in
             </button>
         </div>
@@ -212,4 +215,3 @@
         </div>
     </section>
 {/if}
-
