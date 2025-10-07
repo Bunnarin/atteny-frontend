@@ -9,12 +9,24 @@ export const prerender = true;
 export async function load() {
 	await totalEmployeeStore.ensureInitialized();
 
-	let has_card;
 	if (pb.authStore.isValid) {
 		await pb.collection('users').authRefresh()
 			.catch(() => pb.authStore.clear());
-		has_card = get(pbUser).payway_token;
 	}
 	
-	return { has_card};
+	return { 
+		cards: ['visa', 'mastercard', 'unionpay', 'jcb'],
+		paymentMethods: [
+			{
+				id: 'aba-khqr',
+				name: 'ABA KHQR',
+				description: 'Link your ABA account',
+			},
+			// {
+			// 	id: 'cards',
+			// 	name: 'Credit/Debit Card',
+			// 	description: '',
+			// }
+		]
+	};
 }

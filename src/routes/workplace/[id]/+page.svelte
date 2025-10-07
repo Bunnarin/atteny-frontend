@@ -95,18 +95,11 @@
 {/if}
 
 <div class="form-question">
-    {#if (employees.length - data.free_spots) <= 0}
-    Free Tier: {employees.length} of {data.free_spots}
-    {:else}
-    Paid Tier: ${(employees.length - data.free_spots) * data.rent_price}/month
-    {/if}
-    {#if !data.has_card && employees.length >= data.free_spots}
-        <button class="btn-primary" on:click={() => goto('/buy')}>link card</button>
-    {/if}
+    {employees.length} of {data.free_spots}
     <input
         bind:value={currentEmail}
-        placeholder={!data.has_card && employees.length >= data.free_spots ? 'You need a card to add more employees' : 'Enter email and press space'}
-        readonly={!data.has_card && employees.length >= data.free_spots}
+        placeholder={employees.length >= data.free_spots ? 'Please purchase more employee' : 'Enter email and press space'}
+        readonly={employees.length >= data.free_spots}
         on:input={e => {
             if (e.data !== " " || !currentEmail.includes('@'))
                 return; // make sure that we listen to space, that the user is unique and valid
