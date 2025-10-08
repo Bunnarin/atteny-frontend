@@ -3,11 +3,37 @@
     import { goto } from '$app/navigation';
     import { pb, pbUser, login, logout } from '$lib/stores/pocketbase';
     import { totalEmployeeStore } from '$lib/stores/total_employees';
-    import { PUBLIC_FORM_URL } from '$env/static/public';
+    import { PUBLIC_FORM_URL, PUBLIC_PAYWAY_ENDPOINT, PUBLIC_PB_ENDPOINT } from '$env/static/public';
     export let data;
     let live_mode_modal = false;
     let live_mode_price;
+
+    let merchant_id;
+    pb.send('/payway-merchant-id').then(res => merchant_id = res.merchant_id);
+    const return_url = PUBLIC_PB_ENDPOINT + "/webhook/purchase/" + $pbUser.id;
+
+    async function purchase_payway(method) {
+        const timestamp = Math.floor(Date.now() / 1000);
+        const hashStr = timestamp + merchant_id + timestamp + live_mode_price + $pbUser.email + method + return_url;
+        const { hash } = await pb.send('/hash-payway', {method: 'POST', body: { hashStr }});
+
+        const form = document.getElementById('payway_form');
+        form.insertAdjacentHTML('beforeend',`
+            <input type="hidden" name="req_time" value="${timestamp}">
+            <input type="hidden" name="tran_id" value="${timestamp}">
+            <input type="hidden" name="payment_option" value="${method}">
+            <input type="hidden" name="hash" value="${hash}">
+        `);
+        form.submit();
+    }
 </script>
+
+<form id="payway_form" target="aba_webservice" action="{PUBLIC_PAYWAY_ENDPOINT}/api/payment-gateway/v1/payments/purchase" method="POST">
+    <input type="hidden" name="amount" value="{$live_mode_price}"/>
+    <input type="hidden" name="email" value="{$pbUser.email}"/>
+    <input type="hidden" name="merchant_id" value="{$merchant_id}"/>
+    <input type="hidden" name="return_url" value="{return_url}"/>
+</form>
 
 <div class="header">
     <a href="/"><img class="logo" src="/logo192.png" alt="Logo"/></a>
@@ -58,7 +84,7 @@
         </div>
         {#if $pbUser?.paid_live_mode}
             <button class={$pbUser.live_mode ? 'btn-primary' : 'btn-secondary'} 
-                on:click={async e => await pb.send('/toggle-live-mode', {method:'POST'})}>
+                on:click={pb.send('/toggle-live-mode', {method:'POST'}).then(() => window.location.reload())}>
                 {!$pbUser.live_mode ? 'Enable' : 'Disable'}
             </button>
         {:else}
@@ -66,7 +92,7 @@
             <h3 class="text-lg">Choose Payment Method</h3>
             {#each data.paymentMethods as method}
                 <button class="flex gap-4 w-full p-4 bg-gray-50 hover:bg-gray-100 rounded items-center justify-between"
-                    on:click={() => {}}>
+                    on:click={purchase_payway(method.id)}>
                     <img src="/payway/{method.id}.png" class="w-12 h-12 flex items-center justify-center text-2xl" alt={method.name}>
                     <div class="flex-1 text-left">
                         <p class="font-bold text-gray-900 mb-1">{method.name}</p>
