@@ -49,7 +49,7 @@
                 redirect: 'follow',
             })
             .then(response => response.json())
-            .then(({abapay_deeplink}) => window.location.origin = abapay_deeplink);
+            .then(({abapay_deeplink}) => window.location.href = abapay_deeplink);
         }
     }
 </script>
