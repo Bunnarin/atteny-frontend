@@ -64,7 +64,7 @@
     {#if $pbUser}
         <div class="user">  
             {#if window.deferredInstallPrompt}
-                <button class="btn-secondary" onclick="window.deferredInstallPrompt.prompt()">Add to homescreen</button>
+                <button class="btn-secondary" onclick="window.deferredInstallPrompt.prompt()">📲</button>
             {/if}
             <a href={PUBLIC_FORM_URL} target="_blank"><button class="btn-secondary">✍️</button></a>
             {#if $pbUser.refresh_token}
