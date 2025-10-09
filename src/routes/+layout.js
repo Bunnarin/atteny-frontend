@@ -19,8 +19,9 @@ export async function load() {
 		paymentMethods: [
 			{
 				id: 'aba-khqr',
+				// id: 'cards',
 				name: 'ABA KHQR',
-				description: 'Link your ABA account',
+				description: 'Scan to pay with any banking app',
 			},
 			// {
 			// 	id: 'cards',

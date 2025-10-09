@@ -10,7 +10,8 @@ export const load = async () => {
     // Payment methods data
     const paymentMethods = [
         {
-            id: 'aba-khqr',
+            // id: 'aba-khqr', 
+            id: 'cards',
             name: 'ABA KHQR',
             description: 'Scan to pay with any banking app',
         },

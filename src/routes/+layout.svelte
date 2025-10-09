@@ -7,10 +7,9 @@
     export let data;
     let live_mode_modal = false;
     let live_mode_price;
-
-    let merchant_id;
-    pb.send('/payway-merchant-id').then(res => merchant_id = res.merchant_id);
-    const return_url = PUBLIC_PB_ENDPOINT + "/webhook/purchase/" + $pbUser.id;
+    
+    let merchant_id = $pbUser?.merchant_id;
+    let return_url = PUBLIC_PB_ENDPOINT + "/webhook/purchase/" + $pbUser?.id;
 
     async function purchase_payway(method) {
         const timestamp = Math.floor(Date.now() / 1000);
@@ -30,7 +29,7 @@
 
 <form id="payway_form" target="aba_webservice" action="{PUBLIC_PAYWAY_ENDPOINT}/api/payment-gateway/v1/payments/purchase" method="POST">
     <input type="hidden" name="amount" value="{$live_mode_price}"/>
-    <input type="hidden" name="email" value="{$pbUser.email}"/>
+    <input type="hidden" name="email" value="{$pbUser?.email}"/>
     <input type="hidden" name="merchant_id" value="{$merchant_id}"/>
     <input type="hidden" name="return_url" value="{return_url}"/>
 </form>
@@ -80,7 +79,7 @@
     <div class="modal-content">
         <div class="form-title flex justify-between">
             Updates your sheet in real-time.
-            <button class="btn-secondary" on:click={() => live_mode_modal=false}>X</button>
+            <button class="btn-secondary" on:click={() => live_mode_modal=false}>x</button>
         </div>
         {#if $pbUser?.paid_live_mode}
             <button class={$pbUser.live_mode ? 'btn-primary' : 'btn-secondary'} 
@@ -88,12 +87,12 @@
                 {!$pbUser.live_mode ? 'Enable' : 'Disable'}
             </button>
         {:else}
-            <p class="text-xl font-bold">${live_mode_price}</p>
+            <p class="text-lg">Total: ${live_mode_price}</p>
             <h3 class="text-lg">Choose Payment Method</h3>
             {#each data.paymentMethods as method}
                 <button class="flex gap-4 w-full p-4 bg-gray-50 hover:bg-gray-100 rounded items-center justify-between"
                     on:click={purchase_payway(method.id)}>
-                    <img src="/payway/{method.id}.png" class="w-12 h-12 flex items-center justify-center text-2xl" alt={method.name}>
+                    <img src="/payway/{method.id}.png" class="w-12 rounded-lg" alt={method.name}>
                     <div class="flex-1 text-left">
                         <p class="font-bold text-gray-900 mb-1">{method.name}</p>
                         <p class="text-sm text-gray-500">{method.description}</p>
