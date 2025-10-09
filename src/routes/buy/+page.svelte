@@ -22,7 +22,7 @@
 
         const { hash } = await pb.send('/hash-payway', {
             method: 'POST', 
-            body: { hashStr: timestamp + merchant_id + timestamp + amount + $pbUser.email + payment_option + return_url + window.location.href + "USD" }
+            body: { hashStr: timestamp + merchant_id + timestamp + amount + $pbUser.email + payment_option + return_url + window.location.origin + "USD" }
         });
 
         const form = document.getElementById('aba_merchant_request');
@@ -34,6 +34,7 @@
             <input type="hidden" name="payment_option" value="${payment_option}">
             <input type="hidden" name="hash" value="${hash}">
             <input type="hidden" name="return_url" value="${return_url}">
+            <input type="hidden" name="continue_success_url" value="${window.location.origin}">
         `);
 
         if (!isMobile)
@@ -48,7 +49,7 @@
                 redirect: 'follow',
             })
             .then(response => response.json())
-            .then(({abapay_deeplink}) => window.location.href = abapay_deeplink);
+            .then(({abapay_deeplink}) => window.location.origin = abapay_deeplink);
         }
     }
 </script>
@@ -57,7 +58,6 @@
     <input type="hidden" name="email" value="{$pbUser?.email}"/>
     <input type="hidden" name="currency" value="USD"/>
     <input type="hidden" name="payment_gate" value="0"/>
-    <input type="hidden" name="continue_success_url" value="{window.location.href}"/>
 </form>
 
 <div class="flex flex-wrap gap-4 max-w-2xl mx-auto">
