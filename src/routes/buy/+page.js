@@ -3,15 +3,14 @@ import { pb } from '$lib/stores/pocketbase';
 import { totalEmployeeStore } from '$lib/stores/total_employees.js';
 
 export const load = async () => {
-    await pb.collection('users').authRefresh().catch();
+    await pb.collection('users').authRefresh().catch(() => {});
 
     const { license_price, live_mode_price } = await pb.send('/pricings').catch();
     
     // Payment methods data
     const paymentMethods = [
         {
-            id: 'aba-khqr', 
-            // id: 'cards',
+            id: 'abapay_khqr', 
             name: 'ABA KHQR',
             description: 'Scan to pay with any banking app',
         },

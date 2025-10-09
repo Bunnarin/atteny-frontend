@@ -18,8 +18,7 @@ export async function load() {
 		cards: ['visa', 'mastercard', 'unionpay', 'jcb'],
 		paymentMethods: [
 			{
-				id: 'aba-khqr',
-				// id: 'cards',
+				id: 'abapay_khqr',
 				name: 'ABA KHQR',
 				description: 'Scan to pay with any banking app',
 			},

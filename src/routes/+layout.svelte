@@ -9,13 +9,19 @@
     let live_mode_price;
     
     async function purchase_payway(method) {
-        const { live_mode_price } = await pb.send('/pricings');
         const return_url = PUBLIC_PB_ENDPOINT + "/webhook/live-mode/" + $pbUser.id;
         const { merchant_id } = await pb.send('/payway-merchant-id');
+        
         const timestamp = Math.floor(Date.now() / 1000);
+
+        let payment_option = method;
+        const isMobile = window.innerWidth <= 768;
+        if (method == "abapay_khqr" && isMobile) 
+            payment_option = "abapay_khqr_deeplink";
+
         const { hash } = await pb.send('/hash-payway', {
             method: 'POST', 
-            body: { hashStr: timestamp + merchant_id + timestamp + live_mode_price + $pbUser.email + method + return_url + window.location.href + "USD" }
+            body: { hashStr: timestamp + merchant_id + timestamp + live_mode_price + $pbUser.email + payment_option + return_url + window.location.href + "USD" }
         });
 
         const form = document.getElementById('aba_merchant_request');
@@ -24,11 +30,24 @@
             <input type="hidden" name="merchant_id" value="${merchant_id}">
             <input type="hidden" name="req_time" value="${timestamp}">
             <input type="hidden" name="tran_id" value="${timestamp}">
-            <input type="hidden" name="payment_option" value="${method}">
+            <input type="hidden" name="payment_option" value="${payment_option}">
             <input type="hidden" name="hash" value="${hash}">
             <input type="hidden" name="return_url" value="${return_url}">
         `);
-        AbaPayway.checkout();
+
+        if (!isMobile)
+            AbaPayway.checkout();
+        else {
+            const formObject = Object.fromEntries(new FormData(form).entries());
+            fetch(PUBLIC_PAYWAY_ENDPOINT + "/api/payment-gateway/v1/payments/purchase", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(formObject),
+                redirect: 'follow',
+            })
+            .then(response => response.json())
+            .then(({abapay_deeplink}) => window.location.href = abapay_deeplink);
+        }
     }
 </script>
 
