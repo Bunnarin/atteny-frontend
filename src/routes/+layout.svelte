@@ -8,30 +8,35 @@
     let live_mode_modal = false;
     let live_mode_price;
     
-    let merchant_id = $pbUser?.merchant_id;
-    let return_url = PUBLIC_PB_ENDPOINT + "/webhook/purchase/" + $pbUser?.id;
-
     async function purchase_payway(method) {
+        const { live_mode_price } = await pb.send('/pricings');
+        const return_url = PUBLIC_PB_ENDPOINT + "/webhook/live-mode/" + $pbUser.id;
+        const { merchant_id } = await pb.send('/payway-merchant-id');
         const timestamp = Math.floor(Date.now() / 1000);
-        const hashStr = timestamp + merchant_id + timestamp + live_mode_price + $pbUser.email + method + return_url;
-        const { hash } = await pb.send('/hash-payway', {method: 'POST', body: { hashStr }});
+        const { hash } = await pb.send('/hash-payway', {
+            method: 'POST', 
+            body: { hashStr: timestamp + merchant_id + timestamp + live_mode_price + $pbUser.email + method + return_url + window.location.href + "USD" }
+        });
 
-        const form = document.getElementById('payway_form');
+        const form = document.getElementById('aba_merchant_request');
         form.insertAdjacentHTML('beforeend',`
+            <input type="hidden" name="amount" value="${live_mode_price}">
+            <input type="hidden" name="merchant_id" value="${merchant_id}">
             <input type="hidden" name="req_time" value="${timestamp}">
             <input type="hidden" name="tran_id" value="${timestamp}">
             <input type="hidden" name="payment_option" value="${method}">
             <input type="hidden" name="hash" value="${hash}">
+            <input type="hidden" name="return_url" value="${return_url}">
         `);
-        form.submit();
+        AbaPayway.checkout();
     }
 </script>
 
-<form id="payway_form" target="aba_webservice" action="{PUBLIC_PAYWAY_ENDPOINT}/api/payment-gateway/v1/payments/purchase" method="POST">
-    <input type="hidden" name="amount" value="{$live_mode_price}"/>
+<form id="aba_merchant_request" target="aba_webservice" action="{PUBLIC_PAYWAY_ENDPOINT}/api/payment-gateway/v1/payments/purchase" method="POST">
     <input type="hidden" name="email" value="{$pbUser?.email}"/>
-    <input type="hidden" name="merchant_id" value="{$merchant_id}"/>
-    <input type="hidden" name="return_url" value="{return_url}"/>
+    <input type="hidden" name="currency" value="USD"/>
+    <input type="hidden" name="payment_gate" value="0"/>
+    <input type="hidden" name="continue_success_url" value="{window.location.href}"/>
 </form>
 
 <div class="header">
@@ -45,16 +50,16 @@
             <a href={PUBLIC_FORM_URL} target="_blank"><button class="btn-secondary">✍️</button></a>
             {#if $pbUser.refresh_token}
                 <button on:click={async () => {
-                    if (live_mode_price) 
-                        return live_mode_modal = true;
-                    await pb.send('/pricings')
-                        .then(res => live_mode_price = res.live_mode_price)
-                        .then(() => live_mode_modal = true)
-                        .catch();
+                    if (!live_mode_price) 
+                        await pb.send('/pricings')
+                            .then(res => live_mode_price = res.live_mode_price)
+                            .catch();
+                    live_mode_modal = true
                 }} 
-                    class={$pbUser?.live_mode ? 'btn-primary' : 'btn-secondary'}>
+                class={$pbUser?.live_mode ? 'btn-primary' : 'btn-secondary'}>
                     live mode
                 </button>
+
                 <button class="btn-secondary" on:click={() => goto('/buy')}>
                     {$totalEmployeeStore}/{$pbUser?.max_employees}
                 </button>
