@@ -37,18 +37,18 @@
         `);
 
         if (!isMobile)
-            AbaPayway.checkout();
-        else {
-            const formObject = Object.fromEntries(new FormData(form).entries());
-            fetch(PUBLIC_PAYWAY_ENDPOINT + "/api/payment-gateway/v1/payments/purchase", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(formObject),
-                redirect: 'follow',
-            })
-            .then(response => response.json())
-            .then(({abapay_deeplink}) => window.location.href = abapay_deeplink);
-        }
+            return AbaPayway.checkout();
+        
+        const formData = new FormData(form);
+        const formObject = Object.fromEntries(formData.entries());
+        fetch(PUBLIC_PAYWAY_ENDPOINT + "/api/payment-gateway/v1/payments/purchase", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(formObject),
+            redirect: 'follow',
+        })
+        .then(response => response.json())
+        .then(({abapay_deeplink}) => window.location.href = abapay_deeplink);
     }
 </script>
 

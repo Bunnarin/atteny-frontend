@@ -38,19 +38,18 @@
         `);
 
         if (!isMobile)
-            AbaPayway.checkout();
-        else {
-            const formData = new FormData(form);
-            const formObject = Object.fromEntries(formData.entries());
-            fetch(PUBLIC_PAYWAY_ENDPOINT + "/api/payment-gateway/v1/payments/purchase", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(formObject),
-                redirect: 'follow',
-            })
-            .then(response => response.json())
-            .then(({abapay_deeplink}) => window.location.href = abapay_deeplink);
-        }
+            return AbaPayway.checkout();
+        
+        const formData = new FormData(form);
+        const formObject = Object.fromEntries(formData.entries());
+        fetch(PUBLIC_PAYWAY_ENDPOINT + "/api/payment-gateway/v1/payments/purchase", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(formObject),
+            redirect: 'follow',
+        })
+        .then(response => response.json())
+        .then(({abapay_deeplink}) => window.location.href = abapay_deeplink);
     }
 </script>
 
@@ -62,7 +61,7 @@
 
 <div class="flex flex-wrap gap-4 max-w-2xl mx-auto">
     <div class="flex-1 rounded-lg shadow min-w-full">
-        <h2 class="p-6 border-b text-xl font-semibold text-gray-900">One-Time Purchase</h2>
+        <h2 class="p-6 border-b text-xl font-semibold">One-Time Purchase</h2>
         <div class="p-6 space-y-4">
             <input type="number" bind:value={quantity} placeholder="${data.license_price} per employee" class="w-full px-3 py-2 border rounded-md"/>
             <p class="text-lg">Total: ${(quantity || 0) * data.license_price}</p>
