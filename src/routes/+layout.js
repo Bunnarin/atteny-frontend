@@ -1,6 +1,5 @@
-import { pb, pbUser } from '$lib/stores/pocketbase';
+import { pb } from '$lib/stores/pocketbase';
 import { totalEmployeeStore } from '$lib/stores/total_employees';
-import { get } from 'svelte/store';
 
 export const ssr = false;
 export const prerender = true;
