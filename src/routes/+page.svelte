@@ -135,11 +135,11 @@
         <div class="form-section">
             <h2>{workplace.name}</h2>
             <button class="btn-primary" on:click={() => goto(`/workplace/${workplace.id}`)}>Edit</button>
-            <button class="btn-secondary" on:click={e => {
+            <button class="btn-secondary" title="share this link with your employees to invite them to this workplace" on:click={e => {
                 navigator.clipboard.writeText(window.location.origin + '/subscribe/' + workplace.id);
                 e.target.textContent = "copied";
             }}>
-                copy link
+                invite link
             </button>
         </div>
     {/each}
@@ -152,7 +152,6 @@
             <h2>{workplace.name}</h2>
             <button on:click={e => clockIn(e, workplace)} 
                 disabled={!canClockin(workplace, $clockInStore)} 
-                title={!canClockin(workplace, $clockInStore) ? "your employer doesn't want you to clock in at this time" : ""}
                 class="btn-primary">
                 clock in
             </button>
