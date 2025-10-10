@@ -73,10 +73,10 @@
                         await pb.send('/pricings')
                             .then(res => live_mode_price = res.live_mode_price)
                             .catch();
-                    live_mode_modal = true
+                    live_mode_modal = true;
                 }} 
                 class={$pbUser?.live_mode ? 'btn-primary' : 'btn-secondary'}>
-                    live mode
+                    live
                 </button>
 
                 <button class="btn-secondary" on:click={() => goto('/buy')}>

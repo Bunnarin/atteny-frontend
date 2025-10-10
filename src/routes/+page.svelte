@@ -75,35 +75,42 @@
     async function clockIn(e, workplace) {
         e.target.textContent = 'clocking in...';
         // confirm them to make sure that they don't deny it the first time
-        const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
-        if (permissionStatus.state === "prompt")
-            alert(`We need your location to confirm that you are at this workplace. Please click allow on the next prompt. We do not track your location 24/7. We only check it everytime you clockin.`);
-        
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                const distance = calculateDistance(pos.coords.latitude, pos.coords.longitude, workplace.location.lat, workplace.location.lon);
-                if (distance > workplace.proximity) {
-                    e.target.textContent = 'clock in';
-                    alert(`You are ${distance.toFixed(2)} m away from ${workplace.name}. You must be within ${workplace.proximity} m to clock in.`);
-                }
-                else
-                    pb.send(`/clockin/${workplace.id}`, {method: 'POST', body: {timezone: Intl.DateTimeFormat().resolvedOptions().timeZone}})
-                    .then(() => {
-                        e.target.textContent = '✅';
-                        setTimeout(() => e.target.textContent = 'clock in', 10000);
-                        recordClockIn(workplace.id);
-                    })
-                    .catch(error => {alert(error); e.target.textContent = 'clock in';});
-            },
-            error => {
-                alert("Please make sure that you enable location on your device and that this browser has permission. If you didn't allow us to access your location the first time, please manually allow it on your browser.");
-                e.target.textContent = 'clock in';
-            }
-        );
+        let permissionStatus = localStorage.getItem('has_location_permission');
+        if (!permissionStatus) {
+            alert(`We need your location to confirm that you are at this workplace. Please click allow on the next prompt. We do not track you 24/7. We only check it everytime you clockin.`);
+            localStorage.setItem('has_location_permission', 'true');
+        }
+
+        if (!getting_location && !location) 
+            return alert('Please allow us to access your location first.');
+        else if (getting_location)
+            return setTimeout(() => clockIn(e, workplace), 1000);
+    
+        const distance = calculateDistance(location.latitude, location.longitude, workplace.location.lat, workplace.location.lon);
+        if (distance > workplace.proximity) {
+            e.target.textContent = 'clock in';
+            alert(`You are ${distance.toFixed(2)} m away from ${workplace.name}. You must be within ${workplace.proximity} m to clock in.`);
+        }
+        else
+            pb.send(`/clockin/${workplace.id}`, {method: 'POST', body: {timezone: Intl.DateTimeFormat().resolvedOptions().timeZone}})
+            .then(() => {
+                e.target.textContent = '✅';
+                setTimeout(() => e.target.textContent = 'clock in', 10000);
+                if (workplace.rules.length) 
+                    recordClockIn(workplace.id);
+            })
+            .catch(error => {alert(error); e.target.textContent = 'clock in';});
     }
 
-    // clean up & load clockin status
+    let location;
+    let getting_location = true;
     onMount(() => {
+        // read the location first
+        navigator.geolocation.getCurrentPosition(
+            ({coords}) => {location = coords; getting_location = false;},
+            (error) => {getting_location = false; alert("Please make sure that you enable location on your device and that this browser has permission. If you didn't allow us to access your location the first time, please manually allow it on your browser.");}
+        );
+        // clean up & load clockin status
         const clockIns = JSON.parse(localStorage.getItem('clockIns') || '{}');
         clockIns[today] ??= {}; //init today's records
         Object.keys(clockIns).forEach(date => {
